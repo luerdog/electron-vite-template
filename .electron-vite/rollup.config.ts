@@ -1,31 +1,46 @@
 import path from "path";
-import { nodeResolve } from "@rollup/plugin-node-resolve";
-import { builtinModules } from "module";
+import {nodeResolve} from "@rollup/plugin-node-resolve";
+import {builtinModules} from "module";
 import commonjs from "@rollup/plugin-commonjs";
 import replace from "@rollup/plugin-replace";
 import alias from "@rollup/plugin-alias";
 import json from "@rollup/plugin-json";
 import esbuild from "rollup-plugin-esbuild";
 import obfuscator from "rollup-plugin-obfuscator";
-import { defineConfig } from "rollup";
-import { getConfig } from "./utils";
+import {defineConfig} from "rollup";
+import {getConfig} from "./utils";
+
 const config = getConfig();
 
+// 判断编译
+let getPathByType = (type: string) => {
+  switch (type) {
+    case "main":
+      return {
+        input: path.join(__dirname, "..", "src", "main", "index.ts"),
+        output: path.join(__dirname, "..", "dist", "electron", "main", "main.js"),
+      }
+    case "preload":
+      return {
+        input: path.join(__dirname, "..", "src", "preload", "index.ts"),
+        output: path.join(__dirname, "..", "dist", "electron", "main", "preload.js"),
+      }
+    default:
+      return {
+        input: path.join(__dirname, "..", "src", "preload", `${type}.ts`),
+        output: path.join(__dirname, "..", "dist", "electron", "main", `${type}.js`),
+      }
+  }
+}
+
 export default (env = "production", type = "main") => {
+  // 生成input output
+  let {input, output} = getPathByType(type);
+  console.log(type)
   return defineConfig({
-    input:
-      type === "main"
-        ? path.join(__dirname, "..", "src", "main", "index.ts")
-        : path.join(__dirname, "..", "src", "preload", "index.ts"),
+    input: input, // 注入
     output: {
-      file: path.join(
-        __dirname,
-        "..",
-        "dist",
-        "electron",
-        "main",
-        `${type === "main" ? type : "preload"}.js`
-      ),
+      file: output, // 注入
       format: "cjs",
       name: type === "main" ? "MainProcess" : "MainPreloadProcess",
       sourcemap: false,
@@ -68,7 +83,7 @@ export default (env = "production", type = "main") => {
       }),
       alias({
         entries: [
-          { find: "@main", replacement: path.join(__dirname, "../src/main") },
+          {find: "@main", replacement: path.join(__dirname, "../src/main")},
           {
             find: "@config",
             replacement: path.join(__dirname, "..", "config"),

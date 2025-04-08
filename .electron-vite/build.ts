@@ -12,6 +12,7 @@ import { getArgv } from "./utils";
 
 const mainOpt = rollupOptions(process.env.NODE_ENV, "main");
 const preloadOpt = rollupOptions(process.env.NODE_ENV, "preload");
+const preloadDouyinAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "douyin_authorization");
 
 const { clean = false, target = "client" } = getArgv();
 const isCI = process.env.CI || false;
@@ -56,13 +57,16 @@ async function unionBuild() {
         title: "building preload process",
         task: async () => {
           try {
-            const build = await rollup(preloadOpt);
-            await build.write(preloadOpt.output as OutputOptions);
+            let preloads = [preloadOpt, preloadDouyinAuthorizationOpt];
+            preloads.map(async (item) => {
+              const build = await rollup(item);
+              await build.write(item.output as OutputOptions);
+            })
           } catch (error) {
             errorLog(`failed to build main process\n`);
             return Promise.reject(error);
           }
-        },
+        }
       },
       {
         title: "building renderer process",

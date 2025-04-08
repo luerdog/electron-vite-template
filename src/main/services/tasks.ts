@@ -2,46 +2,54 @@ import {app, session, BrowserWindow} from "electron";
 import * as fs from "node:fs";
 import {getPreloadFile, winURL} from "../config/static-path";
 import config from "@config/index";
+import axios from "axios";
+import * as querystring from "node:querystring";
 
 
-async function restoreCookies(sessionData, file) {
+async function restoreCookies(sessionData, data) {
   try {
-    const cookiesData = fs.readFileSync(file, 'utf8');
-    const cookies = JSON.parse(cookiesData);
-    for (const cookie of cookies) {
-      if (!cookie.url) {
-        cookie.url = 'https://creator.douyin.com/'
+    // 把cookies同步到云端
+    const params = {
+      client_id: data.client_id,
+      platform_id: 1
+    };
+    let apiurl = 'http://doujia-api.luerdog.com/api/pc/get-cookies'
+    // 发送请求
+    axios.post(apiurl, querystring.stringify(params), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        // 可添加其他请求头
+        'User-Agent': 'NodeJS-SyncClient/1.0'
       }
+    }).then(async (response) => {
+      const cookiesData = response.data.data.cookies;
+      console.log(cookiesData);
+      const cookies = JSON.parse(cookiesData);
+      for (const cookie of cookies) {
+        if (!cookie.url) {
+          cookie.url = 'https://creator.douyin.com/'
+        }
 
-      // 排除非本域
-      if (cookie.domain.indexOf('douyin.com') == -1) continue;
-      await sessionData.cookies.set(cookie);
-    }
+        // 排除非本域
+        if (cookie.domain.indexOf('douyin.com') == -1) continue;
+        await sessionData.cookies.set(cookie);
+      }
+    })
   } catch (error) {
     console.log(error)
-    console.log('No saved cookies found');
   }
 }
 
 
 let OnDouyinAuthorization = (data) => {
-  let sessionData = session.fromPartition('douyin:client_id:' + data.client_id, {
+  let tag = 'douyin:client_id:' + data.client_id;
+  console.log(tag)
+  let sessionData = session.fromPartition(tag, {
     cache: true
   });
 
-  let dir = 'douyin_authorization_data'
-  let filename = `cookies_${data.client_id}.json`
-  let url = 'https://creator.douyin.com'
-  // 初始化存放文件夹
-  let fs = require('fs')
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir)
-  }
-
-  let file = [dir, filename].join('/')
-
   // 在窗口加载前调用
-  restoreCookies(sessionData, file);
+  restoreCookies(sessionData, data);
 
   const childWin = new BrowserWindow({
     titleBarStyle: config.IsUseSysTitle ? "default" : "hidden",
@@ -68,7 +76,8 @@ let OnDouyinAuthorization = (data) => {
   if (process.env.NODE_ENV === "development") {
     childWin.webContents.openDevTools({mode: "undocked", activate: true});
   }
-  childWin.loadURL(url);
+  let douyinCreativeUrl = 'https://creator.douyin.com'
+  childWin.loadURL(douyinCreativeUrl);
   childWin.once("ready-to-show", () => {
     childWin.show();
   });
@@ -76,7 +85,22 @@ let OnDouyinAuthorization = (data) => {
   childWin.on('close', async () => {
     const cookies = await sessionData.cookies.get({});
     const cookiesData = JSON.stringify(cookies);
-    fs.writeFileSync(file, cookiesData);
+
+    // 把cookies同步到云端
+    const params = {
+      client_id: data.client_id,
+      platform_id: 1,
+      cookies: cookiesData
+    };
+    let apiurl = 'http://doujia-api.luerdog.com/api/pc/sync-cookies'
+    // 发送请求
+    axios.post(apiurl, querystring.stringify(params), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        // 可添加其他请求头
+        'User-Agent': 'NodeJS-SyncClient/1.0'
+      }
+    })
   });
 }
 

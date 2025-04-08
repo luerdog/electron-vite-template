@@ -17,6 +17,7 @@ const { target = "client", controlledRestart = false } = getArgv();
 
 const mainOpt = rollupOptions(process.env.NODE_ENV, "main");
 const preloadOpt = rollupOptions(process.env.NODE_ENV, "preload");
+const preloadDouyinAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "douyin_authorization");
 
 let electronProcess: ChildProcess | null = null;
 let manualRestart = false;
@@ -125,38 +126,41 @@ function startPreload(): Promise<void> {
       "\n\n"
   );
   return new Promise((resolve, reject) => {
-    const PreloadWatcher = watch(preloadOpt);
-    PreloadWatcher.on("change", (filename) => {
-      // 预加载脚本日志部分
-      logStats(
-        `${
-          config.dev.chineseLog ? "预加载脚本文件变更" : "preLoad-FileChange"
-        }`,
-        filename
-      );
-    });
-    PreloadWatcher.on("event", (event) => {
-      if (event.code === "END") {
-        if (electronProcess && !controlledRestart) {
-          restartElectron();
-        }
-
-        resolve();
-      } else if (event.code === "ERROR") {
-        reject(event.error);
-      }
-      if (controlledRestart) {
-        process.stdout.write("\x1B[2J\x1B[3J");
+    let preloads = [preloadOpt, preloadDouyinAuthorizationOpt];
+    preloads.map(async preload => {
+      const PreloadWatcher = watch(preload);
+      PreloadWatcher.on("change", (filename) => {
+        // 预加载脚本日志部分
         logStats(
-          "cli tips",
           `${
-            config.dev.chineseLog
-              ? "受控重启已启用,请手动输入r + 回车重启"
-              : "Controlled restart is enabled, please manually enter r + Enter to restart"
-          }`
+            config.dev.chineseLog ? "预加载脚本文件变更" : "preLoad-FileChange"
+          }`,
+          filename
         );
-      }
-    });
+      });
+      PreloadWatcher.on("event", (event) => {
+        if (event.code === "END") {
+          if (electronProcess && !controlledRestart) {
+            restartElectron();
+          }
+
+          resolve();
+        } else if (event.code === "ERROR") {
+          reject(event.error);
+        }
+        if (controlledRestart) {
+          process.stdout.write("\x1B[2J\x1B[3J");
+          logStats(
+            "cli tips",
+            `${
+              config.dev.chineseLog
+                ? "受控重启已启用,请手动输入r + 回车重启"
+                : "Controlled restart is enabled, please manually enter r + Enter to restart"
+            }`
+          );
+        }
+      });
+    })
   });
 }
 
