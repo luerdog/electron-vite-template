@@ -8,7 +8,7 @@
     }
   ],
   "productName": "任务推送工具",
-  "appId": "org.sky.electron-vite-template",
+  "appId": "org.sky.doujia-task-pusher",
   "directories": {
     "output": "build"
   },

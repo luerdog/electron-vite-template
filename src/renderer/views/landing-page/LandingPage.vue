@@ -15,14 +15,17 @@ import {ref} from "vue";
 
 const {ipcRendererChannel} = window;
 
-let msg = ref("等待网页任务推送")
+let msgText = "等待网页任务推送";
+let haveNewPushTaskMsg = "有新任务,准备执行!"
+
+let msg = ref(msgText);
 
 ipcRendererChannel.HaveNewPushTask.on((event, arg) => {
   console.log(arg, event)
-  msg.value = "Have new push task"
+  msg.value = haveNewPushTaskMsg;
   setTimeout(() => {
-    msg.value = "等待网页任务推送";
-  }, 1500)
+    msg.value = msgText;
+  }, 2500)
 })
 </script>
 

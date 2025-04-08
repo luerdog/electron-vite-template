@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "./dist/electron/main/main.js",
   "author": "sky <https://github.com/umbrella22>",
-  "description": "electron-vite-template project",
+  "description": "豆荚任务推送工具",
   "license": "MIT",
   "scripts": {
     "dev": "tsx .electron-vite/dev-runner.ts",
