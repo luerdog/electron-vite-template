@@ -4,7 +4,7 @@
  * IpcChannelMainClass 和 IpcChannelRendererClass 是主进程和渲染进程的IPC通道事件监听
  */
 
-import type { ProgressInfo } from "electron-updater";
+import type {ProgressInfo} from "electron-updater";
 
 /**
  * 主进程的IPC通道事件监听
@@ -14,17 +14,17 @@ export interface IpcMainEventListener<Send = void, Receive = void> {
    * 主进程监听事件
    */
   ipcMainHandle: Send extends void
-  ? (event: Electron.IpcMainInvokeEvent) => Receive | Promise<Receive>
-  : (
-    event: Electron.IpcMainInvokeEvent,
-    args: Send
-  ) => Receive | Promise<Receive>;
+    ? (event: Electron.IpcMainInvokeEvent) => Receive | Promise<Receive>
+    : (
+      event: Electron.IpcMainInvokeEvent,
+      args: Send
+    ) => Receive | Promise<Receive>;
   /**
    * 渲染进程给主进程发送消息
    */
   ipcRendererInvoke: Send extends void
-  ? () => Promise<Receive>
-  : (args: Send) => Promise<Receive>;
+    ? () => Promise<Receive>
+    : (args: Send) => Promise<Receive>;
 }
 
 /**
@@ -35,14 +35,14 @@ export interface IpcRendererEventListener<Send = void> {
    * 渲染进程监听事件
    */
   ipcRendererOn: Send extends void
-  ? (event: Electron.IpcRendererEvent) => void
-  : (event: Electron.IpcRendererEvent, args: Send) => void;
+    ? (event: Electron.IpcRendererEvent) => void
+    : (event: Electron.IpcRendererEvent, args: Send) => void;
   /**
    * 主进程给渲染进程发送消息
    */
   webContentSend: Send extends void
-  ? (webContents: Electron.WebContents) => void
-  : (webContents: Electron.WebContents, args: Send) => void;
+    ? (webContents: Electron.WebContents) => void
+    : (webContents: Electron.WebContents, args: Send) => void;
 }
 
 /**
@@ -129,12 +129,12 @@ export class IpcChannelRendererClass {
   }> = null;
   UpdateProcessStatus: IpcRendererEventListener<{
     status:
-    | "init"
-    | "downloading"
-    | "moving"
-    | "finished"
-    | "failed"
-    | "download";
+      | "init"
+      | "downloading"
+      | "moving"
+      | "finished"
+      | "failed"
+      | "download";
     message: string;
   }> = null;
 
@@ -155,4 +155,5 @@ export class IpcChannelRendererClass {
     status: string;
     message: string;
   }> = null;
+  HaveNewPushTask: IpcRendererEventListener<unknown> = null
 }
