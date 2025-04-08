@@ -1,7 +1,7 @@
 import config from "@config/index";
-import { BrowserWindow, dialog } from "electron";
-import { winURL, loadingURL, getPreloadFile } from "../config/static-path";
-import { useProcessException } from "@main/hooks/exception-hook";
+import {BrowserWindow, dialog} from "electron";
+import {winURL, loadingURL, getPreloadFile} from "../config/static-path";
+import {useProcessException} from "@main/hooks/exception-hook";
 
 
 class MainInit {
@@ -12,11 +12,12 @@ class MainInit {
   private childProcessGone = null;
 
   constructor() {
-    const { childProcessGone } = useProcessException();
+    const {childProcessGone} = useProcessException();
     this.winURL = winURL;
     this.shartURL = loadingURL;
     this.childProcessGone = childProcessGone;
   }
+
   // 主窗口函数
   createMainWindow() {
     this.mainWindow = new BrowserWindow({
@@ -24,10 +25,10 @@ class MainInit {
         color: "#fff",
       },
       titleBarStyle: config.IsUseSysTitle ? "default" : "hidden",
-      height: 800,
+      height: 150,
       useContentSize: true,
-      width: 1700,
-      minWidth: 1366,
+      width: 400,
+      resizable: false,
       show: false,
       frame: config.IsUseSysTitle,
       webPreferences: {
@@ -81,6 +82,7 @@ class MainInit {
       this.mainWindow = null;
     });
   }
+
   // 加载窗口函数
   loadingWindow(loadingURL: string) {
     this.loadWindow = new BrowserWindow({
@@ -104,6 +106,7 @@ class MainInit {
       this.createMainWindow();
     }, 1500);
   }
+
   // 初始化窗口函数
   initWindow() {
     if (config.UseStartupChart) {
@@ -113,4 +116,5 @@ class MainInit {
     }
   }
 }
+
 export default MainInit;

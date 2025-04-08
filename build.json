@@ -7,10 +7,16 @@
       "url": "http://127.0.0.1"
     }
   ],
-  "productName": "electron-vite-template",
+  "productName": "任务推送工具",
   "appId": "org.sky.electron-vite-template",
   "directories": {
     "output": "build"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "installerIcon": "build/icons/icon.ico",
+    "uninstallerIcon": "build/icons/icon.ico"
   },
   "files": [
     "dist/electron/**/*"
