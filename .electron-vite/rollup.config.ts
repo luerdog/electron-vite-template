@@ -36,7 +36,6 @@ let getPathByType = (type: string) => {
 export default (env = "production", type = "main") => {
   // 生成input output
   let {input, output} = getPathByType(type);
-  console.log(type)
   return defineConfig({
     input: input, // 注入
     output: {

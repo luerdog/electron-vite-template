@@ -8,7 +8,7 @@ import * as querystring from "node:querystring";
 
 async function restoreCookies(sessionData, data) {
   try {
-    // 把cookies同步到云端
+    // 把cookies从云端拉下来
     const params = {
       client_id: data.client_id,
       platform_id: 1
@@ -23,7 +23,6 @@ async function restoreCookies(sessionData, data) {
       }
     }).then(async (response) => {
       const cookiesData = response.data.data.cookies;
-      console.log(cookiesData);
       const cookies = JSON.parse(cookiesData);
       for (const cookie of cookies) {
         if (!cookie.url) {
@@ -43,7 +42,6 @@ async function restoreCookies(sessionData, data) {
 
 let OnDouyinAuthorization = (data) => {
   let tag = 'douyin:client_id:' + data.client_id;
-  console.log(tag)
   let sessionData = session.fromPartition(tag, {
     cache: true
   });
@@ -104,6 +102,48 @@ let OnDouyinAuthorization = (data) => {
   });
 }
 
+let OnDouyinPushVideo = (data) => {
+  let tag = 'douyin:client_id:' + data.client_id;
+  let sessionData = session.fromPartition(tag, {
+    cache: true
+  });
+
+  // 在窗口加载前调用
+  restoreCookies(sessionData, data);
+
+
+  const childWin = new BrowserWindow({
+    titleBarStyle: config.IsUseSysTitle ? "default" : "hidden",
+    height: 950,
+    useContentSize: true,
+    width: 1920,
+    title: "抖音创作平台",
+    autoHideMenuBar: true,
+    minWidth: 842,
+    frame: config.IsUseSysTitle,
+    show: false,
+    webPreferences: {
+      session: sessionData,
+      sandbox: false,
+      webSecurity: false,
+      // 如果是开发模式可以使用devTools
+      devTools: process.env.NODE_ENV === "development",
+      // 在macos中启用橡皮动画
+      scrollBounce: process.platform === "darwin",
+      preload: getPreloadFile("douyin_push_video"),
+    },
+  });
+  // 开发模式下自动开启devtools
+  if (process.env.NODE_ENV === "development") {
+    childWin.webContents.openDevTools({mode: "undocked", activate: true});
+  }
+  let douyinCreativeUrl = 'https://creator.douyin.com'
+  childWin.loadURL(douyinCreativeUrl);
+  childWin.once("ready-to-show", () => {
+    childWin.show();
+  });
+}
+
 export const useTasks = () => {
   return {
     initTask: (data) => {
@@ -111,7 +151,8 @@ export const useTasks = () => {
         case 'douyin_authorization':
           OnDouyinAuthorization(data);
           break;
-        case 'douyin_push':
+        case 'douyin_push_video':
+          OnDouyinPushVideo(data);
           break;
       }
     }

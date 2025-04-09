@@ -13,6 +13,7 @@ import { getArgv } from "./utils";
 const mainOpt = rollupOptions(process.env.NODE_ENV, "main");
 const preloadOpt = rollupOptions(process.env.NODE_ENV, "preload");
 const preloadDouyinAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "douyin_authorization");
+const preloadDouyinPushVideoOpt = rollupOptions(process.env.NODE_ENV, "douyin_push_video");
 
 const { clean = false, target = "client" } = getArgv();
 const isCI = process.env.CI || false;
@@ -57,7 +58,7 @@ async function unionBuild() {
         title: "building preload process",
         task: async () => {
           try {
-            let preloads = [preloadOpt, preloadDouyinAuthorizationOpt];
+            let preloads = [preloadOpt, preloadDouyinAuthorizationOpt,preloadDouyinPushVideoOpt];
             preloads.map(async (item) => {
               const build = await rollup(item);
               await build.write(item.output as OutputOptions);

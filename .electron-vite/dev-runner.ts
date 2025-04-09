@@ -18,6 +18,7 @@ const { target = "client", controlledRestart = false } = getArgv();
 const mainOpt = rollupOptions(process.env.NODE_ENV, "main");
 const preloadOpt = rollupOptions(process.env.NODE_ENV, "preload");
 const preloadDouyinAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "douyin_authorization");
+const preloadDouyinPushVideoOpt = rollupOptions(process.env.NODE_ENV, "douyin_push_video");
 
 let electronProcess: ChildProcess | null = null;
 let manualRestart = false;
@@ -126,7 +127,7 @@ function startPreload(): Promise<void> {
       "\n\n"
   );
   return new Promise((resolve, reject) => {
-    let preloads = [preloadOpt, preloadDouyinAuthorizationOpt];
+    let preloads = [preloadOpt, preloadDouyinAuthorizationOpt,preloadDouyinPushVideoOpt];
     preloads.map(async preload => {
       const PreloadWatcher = watch(preload);
       PreloadWatcher.on("change", (filename) => {
