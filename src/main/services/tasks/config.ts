@@ -2,6 +2,10 @@ import axios from "axios";
 import querystring from "node:querystring";
 
 export const taskConfig = {
+  window: {
+    width: 1280,
+    height: 900,
+  },
   api: {
     getCookiesApi: 'http://doujia-api.luerdog.com/api/pc/get-cookies',
     synceCookiesApi: 'http://doujia-api.luerdog.com/api/pc/sync-cookies'

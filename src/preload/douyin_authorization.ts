@@ -5,13 +5,12 @@ let douyin_has_shown = localStorage.getItem('douyin-creator-browser-check__has_s
 if (!douyin_has_shown) {
   // 绕过浏览器检测
   localStorage.setItem('douyin-creator-browser-check__has_shown', 'true')
-  location.href = location.href
+  location.reload();
 }
 
 let script = []
 document.addEventListener('mousedown', (event) => {
   const {clientX, clientY, button} = event;
   script.push({x: event.clientX, y: event.clientY, button: event.button});
-  console.log(script)
   log.info(`Mouse click at (${clientX}, ${clientY}), button: ${button}`);
 });

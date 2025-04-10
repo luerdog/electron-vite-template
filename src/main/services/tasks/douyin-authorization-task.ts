@@ -17,9 +17,9 @@ export const onDouyinAuthorization = (data) => {
 
   const childWin = new BrowserWindow({
     titleBarStyle: config.IsUseSysTitle ? "default" : "hidden",
-    height: 950,
+    height: taskConfig.window.height,
     useContentSize: true,
-    width: 1920,
+    width: taskConfig.window.width,
     title: "抖音创作平台",
     autoHideMenuBar: true,
     minWidth: 842,

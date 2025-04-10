@@ -21,7 +21,6 @@ let haveNewPushTaskMsg = "有新任务,准备执行!"
 let msg = ref(msgText);
 
 ipcRendererChannel.HaveNewPushTask.on((event, arg) => {
-  console.log(arg, event)
   msg.value = haveNewPushTaskMsg;
   setTimeout(() => {
     msg.value = msgText;

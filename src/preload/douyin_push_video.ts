@@ -6,47 +6,138 @@ if (!douyin_has_shown) {
   location.reload();
 }
 
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-// 模拟点击发布视频按钮
+function changeTitle(text) {
+  let inputDoms = Array.from(document.querySelectorAll('input'))
 
-setTimeout(async () => {
-  const target = document.elementFromPoint(95, 95);
-  target.click()
+  let input = inputDoms.find(dom => {
+    return dom.placeholder == '填写作品标题，为作品获得更多流量'
+  });
+  if (!input) return;
 
-  setTimeout(async () => {
-    // 1. 获取线上资源
-    const response = await fetch('http://typora-sync.luerdog.com/cloudsync/20250331.mp4');
-    if (!response.ok) throw new Error('网络请求失败');
-    // 2. 转换为 Blob
-    const blob = await response.blob();
+  // 获取原始描述符
+  const descriptor = Object.getOwnPropertyDescriptor(
+    HTMLInputElement.prototype,
+    'value'
+  );
+  console.log(descriptor);
 
-    // 3. 创建 File 对象
-    const file = new File([blob], 'custom-filename.jpg', {
-      type: blob.type || 'image/jpeg'
+  // 重定义 value 属性
+  Object.defineProperty(input, 'value', {
+    ...descriptor,
+    get: function () {
+      return text;
+    },
+    set: function () {
+    } // 阻止外部修改
+  });
+
+  // 更新 UI 显示
+  input.setAttribute('value', text);
+  input.value = text
+
+  // 触发事件
+  const event = new Event('input', {bubbles: true});
+  input.dispatchEvent(event);
+}
+
+function changeDescription(text) {
+  const editor = document.querySelector('.editor-kit-editor-container');
+  const editable = editor.querySelector('[contenteditable="true"]');
+
+  if (editable) {
+    // 方法1B: 更真实的模拟输入（推荐）
+    const textNode = document.createTextNode(text);
+    const range = document.createRange();
+    const selection = window.getSelection();
+
+    // 设置插入位置（当前光标位置或末尾）
+    range.selectNodeContents(editable);
+    range.collapse(false); // false 表示插入到末尾
+
+    // 插入内容
+    range.insertNode(textNode);
+
+    // 移动光标到插入内容之后
+    range.setStartAfter(textNode);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);    // 触发输入事件
+
+    const events = ['input', 'change', 'keydown', 'keyup', 'keypress'];
+    events.forEach(eventType => {
+      const event = new Event(eventType, {
+        bubbles: true,
+        cancelable: true,
+        composed: true
+      });
+      editable.dispatchEvent(event);
+      editor.dispatchEvent(event);
     });
 
-    // 4. 创建 DataTransfer 对象
-    const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(file);
+    // 保持焦点
+    editable.focus();
+    editable.firstElementChild.remove();
+  }
+}
 
-    // 5. 赋值给文件输入框
-    // 找到包含指定文本的div元素
-    const targetDiv = Array.from(document.querySelectorAll('div')).find(div => {
-      return div.textContent.trim() === '点击上传 或直接将视频文件拖入此区域';
-    });
+async function pushVideo() {
+  // 1. 获取线上资源
+  const response = await fetch('http://typora-sync.luerdog.com/cloudsync/2025_3_29.mp4');
+  if (!response.ok) throw new Error('网络请求失败');
+  // 2. 转换为 Blob
+  const blob = await response.blob();
 
-    if (targetDiv) {
-      // 获取父div
-      const parentDiv = targetDiv.parentElement;
-      // 在父div的兄弟节点中查找input元素
-      const inputDom = parentDiv.parentElement.querySelector('input');
-      console.log(inputDom); // 输出找到的input元素
+  // 3. 创建 File 对象
+  const file = new File([blob], 'video.mp4', {
+    type: blob.type || 'video/mp4',
+  });
 
+  // 4. 创建 DataTransfer 对象
+  const dataTransfer = new DataTransfer();
+  dataTransfer.items.add(file);
 
-      inputDom.files = dataTransfer.files;
+  // 5. 赋值给文件输入框
+  // 找到包含指定文本的div元素
+  const targetDiv = Array.from(document.querySelectorAll('div')).find(div => {
+    return div.textContent.trim() === '点击上传 或直接将视频文件拖入此区域';
+  });
 
-      // 6. 触发变更事件
-      inputDom.dispatchEvent(new Event('change', {bubbles: true}));
-    }
-  }, 5000)
-}, 10000)
+  if (targetDiv) {
+    // 获取父div
+    const parentDiv = targetDiv.parentElement;
+    // 在父div的兄弟节点中查找input元素
+    const inputDom = parentDiv.parentElement.querySelector('input');
+
+    inputDom.files = dataTransfer.files;
+
+    // 6. 触发变更事件
+    inputDom.dispatchEvent(new Event('change', {bubbles: true}));
+  }
+}
+
+async function runTask() {
+  try {
+    await delay(6000)
+
+    const target = document.elementFromPoint(95, 95);
+    target.click()
+
+    await delay(4000)
+
+    await pushVideo();
+
+    await delay(2000)
+
+    changeTitle('测试标题')
+    changeDescription("#话题# 陆志洁 luerdog")
+    // 填写标题
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+runTask();
