@@ -1,3 +1,4 @@
+import {contextBridge} from "electron";
 // 抖音创作平台绕过浏览器验证
 let douyin_has_shown = localStorage.getItem('douyin-creator-browser-check__has_shown')
 if (!douyin_has_shown) {
@@ -6,8 +7,44 @@ if (!douyin_has_shown) {
   location.reload();
 }
 
+// 按时间堵塞
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// 监听dom堵塞
+/**
+ * 异步阻塞等待，直到指定选择器的元素出现在DOM中
+ * @param {string} selector - CSS选择器 (如 ".my-class" 或 "#my-id")
+ * @param {number} [timeout=30000] - 超时时间(毫秒)，默认30秒
+ * @param {number} [checkInterval=100] - 检查间隔(毫秒)，默认100ms
+ * @returns {Promise<Element>} 返回解析为找到的元素的Promise
+ * @throws {Error} 如果超时未找到元素
+ */
+function waitForElement(selector, timeout = 30000, checkInterval = 100) {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+
+    // 立即检查一次
+    const element = document.querySelector(selector);
+    if (element) {
+      return resolve(element);
+    }
+
+    // 设置定时器定期检查
+    const interval = setInterval(async () => {
+      const element = document.querySelector(selector);
+
+      if (element) {
+        clearInterval(interval);
+        await delay(1000);
+        resolve(element);
+      } else if (Date.now() - startTime >= timeout) {
+        clearInterval(interval);
+        reject(new Error(`等待元素 "${selector}" 超时 (${timeout}ms)`));
+      }
+    }, checkInterval);
+  });
 }
 
 function changeTitle(text) {
@@ -23,7 +60,6 @@ function changeTitle(text) {
     HTMLInputElement.prototype,
     'value'
   );
-  console.log(descriptor);
 
   // 重定义 value 属性
   Object.defineProperty(input, 'value', {
@@ -42,6 +78,63 @@ function changeTitle(text) {
   // 触发事件
   const event = new Event('input', {bubbles: true});
   input.dispatchEvent(event);
+}
+
+
+// 通过文本高效获取节点dom
+function getParentOfElementWithText(text) {
+  const treeWalker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT
+  );
+
+  while (treeWalker.nextNode()) {
+    const textNode = treeWalker.currentNode;
+    if (textNode.nodeValue.trim() === text) {
+      // 返回文本节点的父元素
+      return textNode.parentElement;
+    }
+  }
+
+  return null;
+}
+
+async function changeArea(text) {
+  // 获取组件 dom
+  let dom = getParentOfElementWithText('输入地理位置')
+
+  // 模拟点击 出现下来菜单
+  dom.click()
+
+  // 获取原始描述符
+  const descriptor = Object.getOwnPropertyDescriptor(
+    HTMLInputElement.prototype,
+    'value'
+  );
+  // 获取input dom
+  let inputDom = dom.nextSibling.querySelector('input')
+  Object.defineProperty(inputDom, 'value', {
+    ...descriptor,
+    get: function () {
+      return text;
+    },
+    set: function () {
+    } // 阻止外部修改
+  });
+
+  // 设置地区
+  inputDom.value = text
+  inputDom.setAttribute("value", text)
+
+  const event = new Event('input', {bubbles: true});
+  inputDom.dispatchEvent(event);
+
+  await delay(500);
+  await waitForElement('.semi-select-option-list');
+
+  let listDom = document.querySelector('.semi-select-option-list')
+  await delay(1500);
+  listDom.firstElementChild.click()
 }
 
 function changeDescription(text) {
@@ -67,6 +160,7 @@ function changeDescription(text) {
     selection.removeAllRanges();
     selection.addRange(range);    // 触发输入事件
 
+
     const events = ['input', 'change', 'keydown', 'keyup', 'keypress'];
     events.forEach(eventType => {
       const event = new Event(eventType, {
@@ -77,10 +171,10 @@ function changeDescription(text) {
       editable.dispatchEvent(event);
       editor.dispatchEvent(event);
     });
+    editable.firstElementChild.remove();
 
     // 保持焦点
     editable.focus();
-    editable.firstElementChild.remove();
   }
 }
 
@@ -119,22 +213,70 @@ async function pushVideo() {
   }
 }
 
+// 设置定时发布
+async function timerSet(time) {
+  // 获取定时发布按钮
+  const btn = getParentOfElementWithText('定时发布')
+  btn.click()
+
+  await delay(1000);
+  console.log('开始触发时间组件!')
+
+  let inputDom = document.querySelector('input[placeholder="日期和时间"]');
+  inputDom.click()
+  inputDom.focus()
+
+  // 设置定时
+  inputDom.value = time;
+  inputDom.setAttribute("value", time)
+
+  const event = new Event('input', {bubbles: true});
+  inputDom.dispatchEvent(event);
+}
+
+async function submit() {
+  await delay(1000);
+  let dom = getParentOfElementWithText('发布')
+
+  dom.click()
+}
+
 async function runTask() {
   try {
-    await delay(6000)
+    await waitForElement('#douyin-creator-master-side-upload-wrap')
 
+    // 点击发布视频按钮
     const target = document.elementFromPoint(95, 95);
     target.click()
 
-    await delay(4000)
+    await waitForElement('.container-drag-icon')
 
+    //推送视频到组件
     await pushVideo();
 
-    await delay(2000)
+    await waitForElement('.editor-kit-root-container')
 
-    changeTitle('测试标题')
-    changeDescription("#话题# 陆志洁 luerdog")
     // 填写标题
+    changeTitle('测试标题')
+    // 填写描述
+    changeDescription("#话题# 陆志洁 luerdog")
+    // 设置地区
+    await changeArea('青城之恋')
+    // 设置定时发布任务
+    window.scrollBy({
+      top: 1000,
+      behavior: 'smooth' // 可以是 'auto' 或 'smooth'
+    });
+    let time = "2025-04-16 17:15"
+    await timerSet(time);
+    // 点击发布
+    let submitKey = setInterval(async () => {
+      let video = document.querySelectorAll('video').length
+      if (video) {
+        clearInterval(submitKey)
+        await submit()
+      }
+    }, 100)
   } catch (err) {
     console.log(err);
   }
