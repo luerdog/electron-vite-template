@@ -112,7 +112,8 @@ async function changeArea(text) {
     'value'
   );
   // 获取input dom
-  let inputDom = dom.nextSibling.querySelector('input')
+  let nextSibling = dom.nextSibling as HTMLElement;
+  let inputDom = nextSibling.querySelector('input')
   Object.defineProperty(inputDom, 'value', {
     ...descriptor,
     get: function () {
@@ -134,12 +135,13 @@ async function changeArea(text) {
 
   let listDom = document.querySelector('.semi-select-option-list')
   await delay(1500);
-  listDom.firstElementChild.click()
+  let listDomFirstChild = listDom.firstElementChild as HTMLElement;
+  listDomFirstChild.click()
 }
 
 function changeDescription(text) {
   const editor = document.querySelector('.editor-kit-editor-container');
-  const editable = editor.querySelector('[contenteditable="true"]');
+  const editable = editor.querySelector('[contenteditable="true"]') as HTMLElement;
 
   if (editable) {
     // 方法1B: 更真实的模拟输入（推荐）
@@ -222,7 +224,7 @@ async function timerSet(time) {
   await delay(1000);
   console.log('开始触发时间组件!')
 
-  let inputDom = document.querySelector('input[placeholder="日期和时间"]');
+  let inputDom: HTMLInputElement = document.querySelector('input[placeholder="日期和时间"]');
   inputDom.click()
   inputDom.focus()
 
@@ -232,6 +234,51 @@ async function timerSet(time) {
 
   const event = new Event('input', {bubbles: true});
   inputDom.dispatchEvent(event);
+}
+
+async function setCover(imageUrl: string) {
+  let dom = getParentOfElementWithText('选择封面')
+
+  dom.click();
+
+  // 等待dy-creator-content-modal-body出现
+  await waitForElement('.dy-creator-content-modal-body')
+
+  // 1. 目标 input 选择器（根据你的实际情况调整）
+  const targetInput: HTMLInputElement = document.querySelector('.semi-upload-hidden-input');
+
+
+  // 3. 获取图片并伪造 File 对象
+  try {
+    // (1) 获取图片 Blob
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+
+    // (2) 创建 File 对象（模拟用户上传的文件）
+    const file = new File([blob], 'fake-image.png', {type: blob.type});
+
+    // (3) 创建 DataTransfer 模拟文件选择
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+
+    // (4) 注入到 input
+    targetInput.files = dataTransfer.files;
+
+    // (5) 触发 change 事件（某些组件依赖这个事件）
+    const event = new Event('change', {bubbles: true});
+    targetInput.dispatchEvent(event);
+
+    console.log('图片已成功注入 input', targetInput.files);
+  } catch (error) {
+    console.error('伪造图片失败:', error);
+  }
+
+
+  let overDom = getParentOfElementWithText('完成')
+
+  overDom.click()
+
+  await delay(1000);
 }
 
 async function submit() {
@@ -246,13 +293,15 @@ async function runTask() {
     await waitForElement('#douyin-creator-master-side-upload-wrap')
 
     // 点击发布视频按钮
-    const target = document.elementFromPoint(95, 95);
+    let target = document.elementFromPoint(95, 95) as HTMLElement;
     target.click()
 
     await waitForElement('.container-drag-icon')
 
     //推送视频到组件
     await pushVideo();
+
+    setCover('http://typora-sync.luerdog.com/cloudsync/avatar.jpg')
 
     await waitForElement('.editor-kit-root-container')
 
@@ -262,21 +311,23 @@ async function runTask() {
     changeDescription("#话题# 陆志洁 luerdog")
     // 设置地区
     await changeArea('青城之恋')
+
     // 设置定时发布任务
     window.scrollBy({
       top: 1000,
       behavior: 'smooth' // 可以是 'auto' 或 'smooth'
     });
+
     let time = "2025-04-16 17:15"
     await timerSet(time);
     // 点击发布
-    let submitKey = setInterval(async () => {
-      let video = document.querySelectorAll('video').length
-      if (video) {
-        clearInterval(submitKey)
-        await submit()
-      }
-    }, 100)
+    // let submitKey = setInterval(async () => {
+    //   let video = document.querySelectorAll('video').length
+    //   if (video) {
+    //     clearInterval(submitKey)
+    //     await submit()
+    //   }
+    // }, 100)
   } catch (err) {
     console.log(err);
   }
