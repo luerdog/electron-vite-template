@@ -7,6 +7,21 @@ if (!douyin_has_shown) {
   location.reload();
 }
 
+async function scrollToCreatorModal(element: HTMLElement) {
+  try {
+    element.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  } catch (error) {
+    // 备用方案（如果浏览器不支持平滑滚动）
+    console.warn('平滑滚动不支持，使用普通滚动');
+    element.scrollIntoView();
+  }
+
+  await delay(500);
+}
+
 // 按时间堵塞
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -44,6 +59,26 @@ function waitForElement(selector, timeout = 30000, checkInterval = 100) {
         reject(new Error(`等待元素 "${selector}" 超时 (${timeout}ms)`));
       }
     }, checkInterval);
+  });
+}
+
+/**
+ * 堵塞等待 直到指定元素消失
+ * @param selector
+ * @param checkInterval
+ */
+function waitForElementToDisappear(selector, checkInterval = 100) {
+  return new Promise((resolve) => {
+    function checkElement() {
+      const element = document.querySelector(selector);
+      if (!element) {
+        resolve(element);
+      } else {
+        setTimeout(checkElement, checkInterval); // 每100毫秒检查一次
+      }
+    }
+
+    checkElement();
   });
 }
 
@@ -102,6 +137,7 @@ function getParentOfElementWithText(text) {
 async function changeArea(text) {
   // 获取组件 dom
   let dom = getParentOfElementWithText('输入地理位置')
+  await waitForElementToDisappear(dom);
 
   // 模拟点击 出现下来菜单
   dom.click()
@@ -137,6 +173,8 @@ async function changeArea(text) {
   await delay(1500);
   let listDomFirstChild = listDom.firstElementChild as HTMLElement;
   listDomFirstChild.click()
+
+  await waitForElementToDisappear('.semi-select-option-list');
 }
 
 function changeDescription(text) {
@@ -219,6 +257,7 @@ async function pushVideo() {
 async function timerSet(time) {
   // 获取定时发布按钮
   const btn = getParentOfElementWithText('定时发布')
+  await scrollToCreatorModal(btn);
   btn.click()
 
   await delay(1000);
@@ -238,11 +277,11 @@ async function timerSet(time) {
 
 async function setCover(imageUrl: string) {
   let dom = getParentOfElementWithText('选择封面')
-
+  await scrollToCreatorModal(dom);
   dom.click();
 
   // 等待dy-creator-content-modal-body出现
-  await waitForElement('.dy-creator-content-modal-body')
+  await waitForElement('.dy-creator-content-modal')
 
   // 1. 目标 input 选择器（根据你的实际情况调整）
   const targetInput: HTMLInputElement = document.querySelector('.semi-upload-hidden-input');
@@ -273,18 +312,17 @@ async function setCover(imageUrl: string) {
     console.error('伪造图片失败:', error);
   }
 
-
   let overDom = getParentOfElementWithText('完成')
 
   overDom.click()
 
-  await delay(1000);
+  await waitForElementToDisappear('.dy-creator-content-modal')
 }
 
 async function submit() {
   await delay(1000);
   let dom = getParentOfElementWithText('发布')
-
+  await scrollToCreatorModal(dom);
   dom.click()
 }
 
@@ -301,31 +339,33 @@ async function runTask() {
     //推送视频到组件
     await pushVideo();
 
-    setCover('http://typora-sync.luerdog.com/cloudsync/avatar.jpg')
 
     await waitForElement('.editor-kit-root-container')
-
     // 填写标题
     changeTitle('测试标题')
     // 填写描述
     changeDescription("#话题# 陆志洁 luerdog")
+    // 设置封面
+    await setCover('http://typora-sync.luerdog.com/cloudsync/avatar.jpg')
     // 设置地区
     await changeArea('青城之恋')
 
-    // 设置定时发布任务
-    window.scrollBy({
-      top: 1000,
-      behavior: 'smooth' // 可以是 'auto' 或 'smooth'
-    });
+    // // 设置定时发布任务
+    // window.scrollBy({
+    //   top: 1000,
+    //   behavior: 'smooth' // 可以是 'auto' 或 'smooth'
+    // });
 
-    let time = "2025-04-16 17:15"
-    await timerSet(time);
+    await timerSet("2025-04-16 17:15");
+
     // 点击发布
     // let submitKey = setInterval(async () => {
     //   let video = document.querySelectorAll('video').length
     //   if (video) {
     //     clearInterval(submitKey)
     //     await submit()
+    //     todo 更新PushJob状态
+    //     todo 给main.js发送信息 可以进行下一个PushJob了
     //   }
     // }, 100)
   } catch (err) {

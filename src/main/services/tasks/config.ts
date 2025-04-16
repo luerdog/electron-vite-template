@@ -14,6 +14,12 @@ export const taskConfig = {
     'creatorDouyinCom': 'https://creator.douyin.com',
   },
   tools: {
+    // todo 通过push-task-id从云端获取任务数据 一次吐出来一个
+    getPushJobByPushTaskId: (pushTaskId) => {
+    },
+    // todo 更新PushJob状态
+    refreshPushJobStatus: (pushJobId) => {
+    },
     restoreCookies: async (sessionData, data) => {
       try {
         // 把cookies从云端拉下来
