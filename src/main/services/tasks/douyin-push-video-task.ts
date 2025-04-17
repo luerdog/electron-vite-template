@@ -48,15 +48,20 @@ let pushJobToDouyin = (job) => {
   });
   // 监听窗口的关闭事件  当关闭的时候  开始下一个job
   childWin.on('close', async () => {
-    // todo 这里需要判断上一个任务是否提交api已经修改状态 给他10秒的时间
-    let nextJob = await taskConfig.tools.getPushJobByPushTaskId(job.push_task.id);
-    console.log(nextJob.id)
-    console.log(oldJob.id)
-    // todo nextJob.id 如果和oldJob.id一致 就再等等
+    try {
+      // todo 这里需要判断上一个任务是否提交api已经修改状态 给他10秒的时间
+      let nextJob = await taskConfig.tools.getPushJobByPushTaskId(job.push_task.id);
+      console.log(nextJob.id)
+      console.log(oldJob.id)
+      // todo nextJob.id 如果和oldJob.id一致 就再等等
 
-    if (nextJob.id != oldJob.id) {
-      oldJob = nextJob;
-      pushJobToDouyin(nextJob)
+      if (nextJob.id != oldJob.id) {
+        oldJob = nextJob;
+        pushJobToDouyin(nextJob)
+      }
+    } catch (err) {
+      console.log("任务结束!");
+      console.log(err);
     }
   })
 }
