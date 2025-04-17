@@ -6,6 +6,122 @@ if (!douyin_has_shown) {
   location.reload();
 }
 
+// 创建悬浮框
+function createFloatingBox(initialContent) {
+  // 检查是否已存在悬浮框
+  if (document.getElementById('floating-box')) {
+    console.warn('悬浮框已经存在');
+    return;
+  }
+
+  // 创建悬浮框元素
+  const floatingBox = document.createElement('div');
+  floatingBox.id = 'floating-box';
+
+  // 使用JS设置样式
+  Object.assign(floatingBox.style, {
+    position: 'fixed',
+    top: '50%',
+    right: '0',
+    transform: 'translateY(-50%)',
+    width: '200px',
+    padding: '15px',
+    backgroundColor: '#f8f9fa',
+    border: '1px solid #dee2e6',
+    borderRight: 'none',
+    borderTopLeftRadius: '5px',
+    borderBottomLeftRadius: '5px',
+    boxShadow: '-2px 0 5px rgba(0, 0, 0, 0.1)',
+    zIndex: '9999',
+    transition: 'all 0.3s ease'
+  });
+
+  // 创建标题
+  const title = document.createElement('h3');
+  title.textContent = '操作提示';
+  Object.assign(title.style, {
+    marginTop: '0',
+    color: '#343a40',
+    fontSize: '16px'
+  });
+
+  // 创建内容区域
+  const content = document.createElement('div');
+  content.id = 'floating-content';
+  content.textContent = initialContent || '这是默认内容';
+  Object.assign(content.style, {
+    margin: '10px 0',
+    color: '#495057',
+    fontSize: '14px'
+  });
+
+  // 创建关闭按钮
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '×';
+  closeBtn.title = '关闭';
+  Object.assign(closeBtn.style, {
+    position: 'absolute',
+    top: '5px',
+    right: '5px',
+    background: 'none',
+    border: 'none',
+    fontSize: '16px',
+    cursor: 'pointer',
+    color: '#6c757d',
+    padding: '0',
+    width: '20px',
+    height: '20px',
+    lineHeight: '20px'
+  });
+
+  // 组装元素
+  floatingBox.appendChild(closeBtn);
+  floatingBox.appendChild(title);
+  floatingBox.appendChild(content);
+  document.body.appendChild(floatingBox);
+
+  // 添加关闭按钮事件
+  closeBtn.addEventListener('click', function () {
+    floatingBox.style.display = 'none';
+  });
+
+  // // 添加悬停效果
+  // floatingBox.addEventListener('mouseenter', function () {
+  //   floatingBox.style.right = '0';
+  // });
+  //
+  // floatingBox.addEventListener('mouseleave', function () {
+  //   floatingBox.style.right = '-170px';
+  // });
+  //
+  // // 初始状态半隐藏
+  // floatingBox.style.right = '-170px';
+
+  // 返回更新内容的方法
+  return {
+    updateContent: function (newContent) {
+      content.textContent = newContent;
+    },
+    updateHtmlContent: function (html) {
+      content.innerHTML = html;
+    },
+    show: function () {
+      floatingBox.style.display = 'block';
+      floatingBox.style.right = '0';
+    },
+    hide: function () {
+      floatingBox.style.display = 'none';
+    },
+    toggle: function () {
+      if (floatingBox.style.display === 'none') {
+        this.show();
+      } else {
+        this.hide();
+      }
+    }
+  };
+}
+
 async function scrollToCreatorModal(element: HTMLElement) {
   try {
     element.scrollIntoView({
@@ -335,29 +451,40 @@ function getJobData() {
 }
 
 async function runTask() {
+  // 初始化悬浮框
+  const floatingBox = createFloatingBox('初始内容');
+
   try {
+    floatingBox.updateContent('正在获取推送任务数据!');
     let jobData = getJobData();
 
     await waitForElement('#douyin-creator-master-side-upload-wrap')
 
+    floatingBox.updateContent("点击发布视频");
     // 点击发布视频按钮
     let target = document.elementFromPoint(95, 95) as HTMLElement;
     target.click()
 
     await waitForElement('.container-drag-icon')
 
+    floatingBox.updateContent('正在上传视频')
     //推送视频到组件
     await pushVideo();
 
 
     await waitForElement('.editor-kit-root-container')
+    floatingBox.updateContent('正在设置标题')
     // 填写标题
     changeTitle(jobData.title)
+    floatingBox.updateContent('正在设置描述')
     // 填写描述
     changeDescription(jobData.describe)
 
-    // 设置地区
-    await changeArea(jobData.location)
+    if (jobData.location) {
+      floatingBox.updateContent('正在设置地区定位')
+      // 设置地区
+      await changeArea(jobData.location)
+    }
 
     // // 设置定时发布任务
     // window.scrollBy({
@@ -365,25 +492,26 @@ async function runTask() {
     //   behavior: 'smooth' // 可以是 'auto' 或 'smooth'
     // });
     if (jobData.is_timing == 1) {
-      console.log('设置定时');
+      floatingBox.updateContent('正在设置定时发布')
       await timerSet(jobData.push_time);
     }
 
     if (jobData.cover_url) {
-      console.log('设置封面');
+      floatingBox.updateContent('正在设置封面图')
       // 设置封面
       await setCover(jobData.cover_url);
     }
 
     // 点击发布
     let submitKey = setInterval(async () => {
+      floatingBox.updateContent('正在等待视频上传完毕')
       // 右侧预览需要切换到视频预览才能监控
       let btn = getParentOfElementWithText('预览视频');
       btn.click();
 
       let video = document.querySelectorAll('video').length
       if (video) {
-
+        floatingBox.updateContent('视频上传完毕,即将发布')
         clearInterval(submitKey)
         await submit()
         // todo 更新PushJob状态
