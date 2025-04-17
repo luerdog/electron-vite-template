@@ -8,14 +8,31 @@ export const taskConfig = {
   },
   api: {
     getCookiesApi: 'http://doujia-api.luerdog.com/api/pc/get-cookies',
-    synceCookiesApi: 'http://doujia-api.luerdog.com/api/pc/sync-cookies'
+    synceCookiesApi: 'http://doujia-api.luerdog.com/api/pc/sync-cookies',
+    getFirstJobByTaskApi: 'http://doujia-api.luerdog.com/api/user/push-jobs/get-first-job-by-task'
   },
   url: {
     'creatorDouyinCom': 'https://creator.douyin.com',
   },
   tools: {
     // todo 通过push-task-id从云端获取任务数据 一次吐出来一个
-    getPushJobByPushTaskId: (pushTaskId) => {
+    getPushJobByPushTaskId: async (pushTaskId) => {
+      try {
+        let params = {
+          push_task_id: pushTaskId,
+        }
+        let res = await axios.post(taskConfig.api.getFirstJobByTaskApi, querystring.stringify(params), {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            // 可添加其他请求头
+            'User-Agent': 'NodeJS-SyncClient/1.0'
+          }
+        })
+
+        return res.data.data
+      } catch (error) {
+        console.log(error);
+      }
     },
     // todo 更新PushJob状态
     refreshPushJobStatus: (pushJobId) => {

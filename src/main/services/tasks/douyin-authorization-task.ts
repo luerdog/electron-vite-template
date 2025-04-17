@@ -6,7 +6,6 @@ import axios from "axios";
 import querystring from "node:querystring";
 
 export const onDouyinAuthorization = (data) => {
-
   let tag = 'douyin:client_id:' + data.client_id;
   let sessionData = session.fromPartition(tag, {
     cache: true

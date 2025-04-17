@@ -1,4 +1,3 @@
-import {contextBridge} from "electron";
 // 抖音创作平台绕过浏览器验证
 let douyin_has_shown = localStorage.getItem('douyin-creator-browser-check__has_shown')
 if (!douyin_has_shown) {
@@ -16,7 +15,7 @@ async function scrollToCreatorModal(element: HTMLElement) {
   } catch (error) {
     // 备用方案（如果浏览器不支持平滑滚动）
     console.warn('平滑滚动不支持，使用普通滚动');
-    element.scrollIntoView();
+    // element.scrollIntoView();
   }
 
   await delay(500);
@@ -137,7 +136,7 @@ function getParentOfElementWithText(text) {
 async function changeArea(text) {
   // 获取组件 dom
   let dom = getParentOfElementWithText('输入地理位置')
-  await waitForElementToDisappear(dom);
+  await scrollToCreatorModal(dom);
 
   // 模拟点击 出现下来菜单
   dom.click()
@@ -277,7 +276,10 @@ async function timerSet(time) {
 
 async function setCover(imageUrl: string) {
   let dom = getParentOfElementWithText('选择封面')
-  await scrollToCreatorModal(dom);
+  if (!dom) {
+    dom = getParentOfElementWithText('立即修改')
+  }
+  await scrollToCreatorModal(dom.parentElement);
   dom.click();
 
   // 等待dy-creator-content-modal-body出现
@@ -311,11 +313,11 @@ async function setCover(imageUrl: string) {
   } catch (error) {
     console.error('伪造图片失败:', error);
   }
+  await delay(2000);
 
   let overDom = getParentOfElementWithText('完成')
 
   overDom.click()
-
   await waitForElementToDisappear('.dy-creator-content-modal')
 }
 
@@ -326,8 +328,16 @@ async function submit() {
   dom.click()
 }
 
+function getJobData() {
+  const rawArgs = process.argv
+  const dataIndex = rawArgs.indexOf('--job-data') + 1
+  return JSON.parse(rawArgs[dataIndex])
+}
+
 async function runTask() {
   try {
+    let jobData = getJobData();
+
     await waitForElement('#douyin-creator-master-side-upload-wrap')
 
     // 点击发布视频按钮
@@ -342,35 +352,49 @@ async function runTask() {
 
     await waitForElement('.editor-kit-root-container')
     // 填写标题
-    changeTitle('测试标题')
+    changeTitle(jobData.title)
     // 填写描述
-    changeDescription("#话题# 陆志洁 luerdog")
-    // 设置封面
-    await setCover('http://typora-sync.luerdog.com/cloudsync/avatar.jpg')
+    changeDescription(jobData.describe)
+
     // 设置地区
-    await changeArea('青城之恋')
+    await changeArea(jobData.location)
 
     // // 设置定时发布任务
     // window.scrollBy({
     //   top: 1000,
     //   behavior: 'smooth' // 可以是 'auto' 或 'smooth'
     // });
+    if (jobData.is_timing == 1) {
+      console.log('设置定时');
+      await timerSet(jobData.push_time);
+    }
 
-    await timerSet("2025-04-16 17:15");
+    if (jobData.cover_url) {
+      console.log('设置封面');
+      // 设置封面
+      await setCover(jobData.cover_url);
+    }
 
     // 点击发布
-    // let submitKey = setInterval(async () => {
-    //   let video = document.querySelectorAll('video').length
-    //   if (video) {
-    //     clearInterval(submitKey)
-    //     await submit()
-    //     todo 更新PushJob状态
-    //     todo 给main.js发送信息 可以进行下一个PushJob了
-    //   }
-    // }, 100)
+    let submitKey = setInterval(async () => {
+      // 右侧预览需要切换到视频预览才能监控
+      let btn = getParentOfElementWithText('预览视频');
+      btn.click();
+
+      let video = document.querySelectorAll('video').length
+      if (video) {
+
+        clearInterval(submitKey)
+        await submit()
+        // todo 更新PushJob状态
+        // todo 给main.js发送信息 可以进行下一个PushJob了
+      }
+    }, 100)
   } catch (err) {
     console.log(err);
   }
 }
 
-runTask();
+window.onload = async () => {
+  await runTask();
+}

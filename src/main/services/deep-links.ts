@@ -20,15 +20,17 @@ let winFocus = () => {
 }
 let parseData = (originalUrl) => {
   const parseUrl = url.parse(originalUrl);
-  const queryData = querystring.parse(parseUrl.query);
+  // const queryData = querystring.parse(parseUrl.query);
 
-  let data = {
-    client_id: queryData.client_id || null,
-    user_id: queryData.user_id || null,
-    type: queryData.type || null,
-  };
+  // let data = {
+  //   client_id: queryData.client_id || null,
+  //   user_id: queryData.user_id || null,
+  //   push_task_id: queryData.push_task_id || null,
+  //   type: queryData.type || null,
+  // };
 
-  return data;
+  // return queryData;
+  return querystring.parse(parseUrl.query);
 }
 
 export const useDeepLinks = () => {

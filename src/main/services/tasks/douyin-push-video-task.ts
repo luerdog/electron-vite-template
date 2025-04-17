@@ -3,7 +3,8 @@ import {BrowserWindow, session} from "electron";
 import config from "@config/index";
 import {getPreloadFile} from "@main/config/static-path";
 
-export const onDouyinPushVideo = (data) => {
+let pushJobToDouyin = (job) => {
+  let data = {client_id: job.push_task.client_id}
   let tag = 'douyin:client_id:' + data.client_id;
   let sessionData = session.fromPartition(tag, {
     cache: true
@@ -12,13 +13,12 @@ export const onDouyinPushVideo = (data) => {
   // 在窗口加载前调用
   taskConfig.tools.restoreCookies(sessionData, data);
 
-
   const childWin = new BrowserWindow({
     titleBarStyle: config.IsUseSysTitle ? "default" : "hidden",
     height: taskConfig.window.height,
     useContentSize: true,
     width: taskConfig.window.width,
-    title: "抖音创作平台",
+    title: "抖音创作平台 " + job.push_task.title,
     autoHideMenuBar: true,
     minWidth: 842,
     frame: config.IsUseSysTitle,
@@ -32,6 +32,7 @@ export const onDouyinPushVideo = (data) => {
       // 在macos中启用橡皮动画
       scrollBounce: process.platform === "darwin",
       preload: getPreloadFile("douyin_push_video"),
+      additionalArguments: ['--job-data', JSON.stringify(job)],
     },
   });
   // 开发模式下自动开启devtools
@@ -43,4 +44,12 @@ export const onDouyinPushVideo = (data) => {
   childWin.once("ready-to-show", () => {
     childWin.show();
   });
+  // 监听窗口的关闭事件  当关闭的时候  开始下一个job
+  childWin.on('close', () => {
+  })
+}
+
+export const onDouyinPushVideo = async (data) => {
+  let job = await taskConfig.tools.getPushJobByPushTaskId(data.push_task_id)
+  pushJobToDouyin(job)
 }
