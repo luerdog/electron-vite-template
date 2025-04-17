@@ -3,6 +3,8 @@ import {BrowserWindow, session} from "electron";
 import config from "@config/index";
 import {getPreloadFile} from "@main/config/static-path";
 
+let oldJob = null;
+
 let pushJobToDouyin = (job) => {
   let data = {client_id: job.push_task.client_id}
   let tag = 'douyin:client_id:' + data.client_id;
@@ -45,11 +47,22 @@ let pushJobToDouyin = (job) => {
     childWin.show();
   });
   // 监听窗口的关闭事件  当关闭的时候  开始下一个job
-  childWin.on('close', () => {
+  childWin.on('close', async () => {
+    // todo 这里需要判断上一个任务是否提交api已经修改状态 给他10秒的时间
+    let nextJob = await taskConfig.tools.getPushJobByPushTaskId(job.push_task.id);
+    console.log(nextJob.id)
+    console.log(oldJob.id)
+    // todo nextJob.id 如果和oldJob.id一致 就再等等
+
+    if (nextJob.id != oldJob.id) {
+      oldJob = nextJob;
+      pushJobToDouyin(nextJob)
+    }
   })
 }
 
 export const onDouyinPushVideo = async (data) => {
-  let job = await taskConfig.tools.getPushJobByPushTaskId(data.push_task_id)
+  let job = await taskConfig.tools.getPushJobByPushTaskId(data.push_task_id);
+  oldJob = job;
   pushJobToDouyin(job)
 }

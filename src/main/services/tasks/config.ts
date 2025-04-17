@@ -9,7 +9,8 @@ export const taskConfig = {
   api: {
     getCookiesApi: 'http://doujia-api.luerdog.com/api/pc/get-cookies',
     synceCookiesApi: 'http://doujia-api.luerdog.com/api/pc/sync-cookies',
-    getFirstJobByTaskApi: 'http://doujia-api.luerdog.com/api/user/push-jobs/get-first-job-by-task'
+    getFirstJobByTaskApi: 'http://doujia-api.luerdog.com/api/user/push-jobs/get-first-job-by-task',
+    changePushJobStatusApi: 'http://doujia-api.luerdog.com/api/user/push-jobs/change-status'
   },
   url: {
     'creatorDouyinCom': 'https://creator.douyin.com',
@@ -29,6 +30,23 @@ export const taskConfig = {
           }
         })
 
+        return res.data.data
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    changePushJobStatus: async (jobId) => {
+      try {
+        let params = {
+          'push_job_id': jobId
+        }
+
+        let res = await axios.put(taskConfig.api.changePushJobStatusApi, querystring.stringify(params), {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'NodeJS-SyncClient/1.0'
+          }
+        })
         return res.data.data
       } catch (error) {
         console.log(error);

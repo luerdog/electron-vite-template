@@ -1,4 +1,6 @@
 // 抖音创作平台绕过浏览器验证
+import {taskConfig} from "@main/services/tasks/config";
+
 let douyin_has_shown = localStorage.getItem('douyin-creator-browser-check__has_shown')
 if (!douyin_has_shown) {
   // 绕过浏览器检测
@@ -514,6 +516,14 @@ async function runTask() {
         floatingBox.updateContent('视频上传完毕,即将发布')
         clearInterval(submitKey)
         await submit()
+
+        await delay(2000);
+
+        // todo 需要等待作品列表出现
+        await taskConfig.tools.changePushJobStatus(jobData.id)
+
+        await delay(1000);
+        close();
         // todo 更新PushJob状态
         // todo 给main.js发送信息 可以进行下一个PushJob了
       }
