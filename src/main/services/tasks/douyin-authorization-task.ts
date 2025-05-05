@@ -33,6 +33,7 @@ export const onDouyinAuthorization = (data) => {
       // 在macos中启用橡皮动画
       scrollBounce: process.platform === "darwin",
       preload: getPreloadFile("douyin_authorization"),
+      additionalArguments: ['--job-data', JSON.stringify(data)]
     },
   });
   // 开发模式下自动开启devtools

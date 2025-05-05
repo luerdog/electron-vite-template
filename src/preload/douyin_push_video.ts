@@ -502,9 +502,11 @@ async function runTask() {
 
     await waitForElement('.editor-kit-root-container')
     floatingBox.updateContent('正在设置标题')
+    await delay(1000);
     // 填写标题
     changeTitle(jobData.title)
     floatingBox.updateContent('正在设置描述')
+    await delay(1000);
     // 填写描述
     changeDescription(jobData.describe)
 
@@ -514,11 +516,6 @@ async function runTask() {
       await changeArea(jobData.location)
     }
 
-    // // 设置定时发布任务
-    // window.scrollBy({
-    //   top: 1000,
-    //   behavior: 'smooth' // 可以是 'auto' 或 'smooth'
-    // });
     if (jobData.is_timing == 1) {
       floatingBox.updateContent('正在设置定时发布')
       await timerSet(jobData.push_time);
@@ -545,14 +542,14 @@ async function runTask() {
 
         await delay(2000);
 
-        // todo 需要等待作品列表出现
+        // 需要等待作品列表出现
         await waitForText('作品管理')
+
+        // todo 等待第一个作品的标题是否是发布的标题
         await taskConfig.tools.changePushJobStatus(jobData.id)
 
         await delay(1000);
-        close();
-        // todo 更新PushJob状态
-        // todo 给main.js发送信息 可以进行下一个PushJob了
+        // close();
       }
     }, 100)
   } catch (err) {
