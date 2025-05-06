@@ -1,7 +1,9 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent, shell } from "electron";
-import { platform, release, arch } from "os";
-import { onUnmounted } from "vue";
-import { IpcChannelMainClass, IpcChannelRendererClass } from "../ipc/index";
+import {contextBridge, ipcRenderer, IpcRendererEvent, shell} from "electron";
+import {platform, release, arch} from "os";
+import {onUnmounted} from "vue";
+import {IpcChannelMainClass, IpcChannelRendererClass} from "../ipc/index";
+
+ipcRenderer.invoke('HotUpdate')
 
 function getIpcRenderer() {
   const IpcRenderer = {};

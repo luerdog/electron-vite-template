@@ -2,18 +2,19 @@
  * power by biuuu
  */
 
-import { emptyDir, createWriteStream, readFile, copy, remove } from "fs-extra";
-import { join, resolve } from "path";
-import { promisify } from "util";
-import { pipeline } from "stream";
-import { app, BrowserWindow } from "electron";
-import { gt } from "semver";
-import { createHmac } from "crypto";
+import {emptyDir, createWriteStream, readFile, copy, remove} from "fs-extra";
+import {join, resolve} from "path";
+import {promisify} from "util";
+import {pipeline} from "stream";
+import {app, BrowserWindow} from "electron";
+import {gt} from "semver";
+import {createHmac} from "crypto";
 import AdmZip from "adm-zip";
-import { version } from "../../../package.json";
-import { hotPublishConfig } from "../config/hot-publish";
-import axios, { AxiosResponse } from "axios";
-import { webContentSend } from "./web-content-send";
+import {version} from "../../../package.json";
+import {hotPublishConfig} from "../config/hot-publish";
+import axios, {AxiosResponse} from "axios";
+import {webContentSend} from "./web-content-send";
+import log from "electron-log";
 
 const streamPipeline = promisify(pipeline);
 const appPath = app.getAppPath();
@@ -42,7 +43,7 @@ function hash(data: Buffer, type = "sha256", key = "Sky"): string {
  * @date 2021-03-05
  */
 async function download(url: string, filePath: string): Promise<void> {
-  const res = await request({ url, responseType: "stream" });
+  const res = await request({url, responseType: "stream"});
   await streamPipeline(res.data, createWriteStream(filePath));
 }
 
@@ -73,6 +74,7 @@ export const updater = async (windows?: BrowserWindow): Promise<void> => {
       }.json?time=${new Date().getTime()}`,
     });
     if (gt(res.data.version, version)) {
+      log.info('开始更新~' + res.data.version);
       await emptyDir(updatePath);
       const filePath = join(updatePath, res.data.name);
       updateInfo.status = "downloading";

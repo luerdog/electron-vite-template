@@ -35,6 +35,9 @@ $ npm run dev
 # build electron application for production
 $ npm run build
 
+# 热更新 复制build/update中的文件到更新域名下
+$ npm run build ; npm run pack:resources
+
 
 ```
 

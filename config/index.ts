@@ -1,6 +1,7 @@
 export default {
   build: {
-    hotPublishUrl: "",
+    // todo 修改为正式的更新资源存放地址
+    hotPublishUrl: "http://douyin-pc-upload.dd",
     hotPublishConfigName: "update-config",
   },
   dev: {
