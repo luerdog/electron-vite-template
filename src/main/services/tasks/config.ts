@@ -22,6 +22,8 @@ export const taskConfig = {
       try {
         let params = {
           push_task_id: pushTaskId,
+          // 设置推送类型为PC软件推送
+          push_type: 1
         }
         let res = await axios.post(taskConfig.api.getFirstJobByTaskApi, querystring.stringify(params), {
           headers: {

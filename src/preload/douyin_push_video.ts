@@ -549,7 +549,7 @@ async function runTask() {
         await taskConfig.tools.changePushJobStatus(jobData.id)
 
         await delay(1000);
-        // close();
+        close();
       }
     }, 100)
   } catch (err) {

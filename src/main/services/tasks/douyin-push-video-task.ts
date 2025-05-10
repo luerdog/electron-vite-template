@@ -6,7 +6,7 @@ import {getPreloadFile} from "@main/config/static-path";
 let oldJob = null;
 
 let pushJobToDouyin = (job) => {
-  let data = {client_id: job.push_task.client_id}
+  let data = {client_id: job.client_id}
   let tag = 'douyin:client_id:' + data.client_id;
   let sessionData = session.fromPartition(tag, {
     cache: true

@@ -62,8 +62,7 @@ function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// 直到用户登录完成后获取用户的user_id 然后调用接口同步到数据库
-window.onload = async function () {
+let syncUserId = async () => {
   waitForText('抖音号：').then(function () {
     let user_data_json = localStorage.getItem('__tea_cache_tokens_2906');
     if (!user_data_json) return
@@ -89,4 +88,17 @@ window.onload = async function () {
       else alert('出问题了!')
     })
   })
+}
+
+// let syncUserInfo = async () => {
+//   waitForText('抖音号：').then(function () {
+//     let params = getJobData();
+//
+//     let
+//   })
+// }
+
+// 直到用户登录完成后获取用户的user_id 然后调用接口同步到数据库
+window.onload = async function () {
+  await syncUserId();
 }
