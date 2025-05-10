@@ -33,9 +33,9 @@ export const taskConfig = {
           }
         })
 
-        return res.data.data
+        return res.data.data;
       } catch (error) {
-        console.log(error);
+        return false;
       }
     },
     changePushJobStatus: async (jobId) => {

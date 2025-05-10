@@ -62,6 +62,12 @@ function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+let syncUserSession = async() => {
+  waitForText('抖音号：').then(function () {
+
+  })
+}
+
 let syncUserId = async () => {
   waitForText('抖音号：').then(function () {
     let user_data_json = localStorage.getItem('__tea_cache_tokens_2906');

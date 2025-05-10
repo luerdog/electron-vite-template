@@ -2,8 +2,12 @@ import {taskConfig} from "@main/services/tasks/config";
 import {BrowserWindow, session} from "electron";
 import config from "@config/index";
 import {getPreloadFile} from "@main/config/static-path";
+import NodeCache from "node-cache";
 
 let oldJob = null;
+let tryItAgainCount = 0;
+
+const cache = new NodeCache({stdTTL: 3600})
 
 let pushJobToDouyin = (job) => {
   let data = {client_id: job.client_id}
@@ -13,7 +17,13 @@ let pushJobToDouyin = (job) => {
   });
 
   // 在窗口加载前调用
-  taskConfig.tools.restoreCookies(sessionData, data);
+  // todo 判断sessionData中是否存在数据 如果存在 就不同步服务器的数据过来了
+  let needRestoreCookies = cache.get("needRestoreCookie");
+  if (!needRestoreCookies) {
+    console.log('同步session')
+    taskConfig.tools.restoreCookies(sessionData, data);
+    cache.set("needRestoreCookie", true);
+  }
 
   const childWin = new BrowserWindow({
     titleBarStyle: config.IsUseSysTitle ? "default" : "hidden",
@@ -46,18 +56,30 @@ let pushJobToDouyin = (job) => {
   childWin.once("ready-to-show", () => {
     childWin.show();
   });
+
   // 监听窗口的关闭事件  当关闭的时候  开始下一个job
   childWin.on('close', async () => {
     try {
       // todo 这里需要判断上一个任务是否提交api已经修改状态 给他10秒的时间
       let nextJob = await taskConfig.tools.getPushJobByPushTaskId(job.push_task.id);
+      if (!nextJob) {
+        console.log('任务全部完成!')
+        return;
+      }
       console.log(nextJob.id)
       console.log(oldJob.id)
-      // todo nextJob.id 如果和oldJob.id一致 就再等等
 
       if (nextJob.id != oldJob.id) {
+        tryItAgainCount = 0;
         oldJob = nextJob;
         pushJobToDouyin(nextJob)
+      }
+
+      // nextJob.id 如果和oldJob.id一致 就再等等 重试三次
+      if (tryItAgainCount <= 2) {
+        // 重试三次
+        tryItAgainCount++;
+        pushJobToDouyin(nextJob);
       }
     } catch (err) {
       console.log("任务结束!");
@@ -68,6 +90,10 @@ let pushJobToDouyin = (job) => {
 
 export const onDouyinPushVideo = async (data) => {
   let job = await taskConfig.tools.getPushJobByPushTaskId(data.push_task_id);
+  if (!job) {
+    console.log('没有可以推送的任务!')
+    return;
+  }
   oldJob = job;
   pushJobToDouyin(job)
 }

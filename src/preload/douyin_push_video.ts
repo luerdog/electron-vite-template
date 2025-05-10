@@ -478,6 +478,10 @@ function waitForText(text, timeout = 30000, interval = 100) {
   });
 }
 
+function hasText(text) {
+  return document.body.textContent.includes(text);
+}
+
 async function runTask() {
   // 初始化悬浮框
   const floatingBox = createFloatingBox('初始内容');
@@ -485,8 +489,12 @@ async function runTask() {
   try {
     floatingBox.updateContent('正在获取推送任务数据!');
     let jobData = getJobData();
+    await delay(5000);
+    // 判断是否是登录状态 不是的话 直接关闭
+    if (hasText('扫码登录')) close();
 
     await waitForElement('#douyin-creator-master-side-upload-wrap')
+
 
     floatingBox.updateContent("点击发布视频");
     // 点击发布视频按钮
