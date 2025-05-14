@@ -59,6 +59,12 @@ let pushJobToDouyin = (job) => {
 
   // 监听窗口的关闭事件  当关闭的时候  开始下一个job
   childWin.on('close', async () => {
+    // 如果oldJob不是定时推送任务 就不继续执行了
+    if (oldJob.is_timing != 1) {
+      console.log("不是定时发布任务,所以只推送一条!");
+      return;
+    }
+
     try {
       // todo 这里需要判断上一个任务是否提交api已经修改状态 给他10秒的时间
       let nextJob = await taskConfig.tools.getPushJobByPushTaskId(job.push_task.id);
@@ -75,7 +81,7 @@ let pushJobToDouyin = (job) => {
         pushJobToDouyin(nextJob)
       }
 
-      // nextJob.id 如果和oldJob.id一致 就再等等 重试三次
+      // nextJob.id 如果和oldJob.id一致 就重试 重试三次
       if (tryItAgainCount <= 2) {
         // 重试三次
         tryItAgainCount++;

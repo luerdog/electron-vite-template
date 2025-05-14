@@ -15,9 +15,9 @@ let winFocus = () => {
   }
   mainWindow.webContents.send("HaveNewPushTask");
 
-
   mainWindow.focus()
 }
+
 let parseData = (originalUrl) => {
   const parseUrl = url.parse(originalUrl);
   // const queryData = querystring.parse(parseUrl.query);
@@ -55,7 +55,7 @@ export const useDeepLinks = () => {
 
           // 解析协议携带参数 判断任务类型
           let data = parseData(commandLine[commandLine.length - 1]);
-          log.info(JSON.stringify(data));
+          // log.info(JSON.stringify(data));
 
           useTasks().initTask(data)
         })
