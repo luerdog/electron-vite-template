@@ -371,7 +371,7 @@ async function pushVideo() {
 }
 
 // 设置定时发布
-async function timerSet(time) {
+async function timerSet(jobData) {
   // 获取定时发布按钮
   const btn = getParentOfElementWithText('定时发布')
   await scrollToCreatorModal(btn);
@@ -385,8 +385,8 @@ async function timerSet(time) {
   inputDom.focus()
 
   // 设置定时
-  inputDom.value = time;
-  inputDom.setAttribute("value", time)
+  inputDom.value = jobData.release_at;
+  inputDom.setAttribute("value", jobData.release_at);
 
   const event = new Event('input', {bubbles: true});
   inputDom.dispatchEvent(event);
@@ -491,7 +491,10 @@ async function runTask() {
     let jobData = getJobData();
     await delay(5000);
     // 判断是否是登录状态 不是的话 直接关闭
-    if (hasText('扫码登录')) close();
+    if (hasText('扫码登录')) {
+      alert("抖音号:" + jobData.client.name + "授权可能过期了,前往授权页面查看/重新授权!");
+      close();
+    }
 
     await waitForElement('#douyin-creator-master-side-upload-wrap')
 
@@ -524,9 +527,9 @@ async function runTask() {
       await changeArea(jobData.location)
     }
 
-    if (jobData.is_timing == 1) {
+    if (jobData.is_fore_push == 'fore_push') {
       floatingBox.updateContent('正在设置定时发布')
-      await timerSet(jobData.push_time);
+      await timerSet(jobData);
     }
 
     if (jobData.cover_url) {

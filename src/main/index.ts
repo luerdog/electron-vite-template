@@ -8,12 +8,15 @@ import {useDisableButton} from "./hooks/disable-button-hook";
 import {useProcessException} from "@main/hooks/exception-hook";
 import {useMenu} from "@main/hooks/menu-hook";
 
+import {OnDouyinLoopPushJobTask} from '@main/services/tasks/douyin-loop-push-job-task'
+
 function onAppReady() {
   const {disableF12} = useDisableButton();
   const {renderProcessGone} = useProcessException();
   const {defaultIpc} = useMainDefaultIpc();
   const {initDeepLinks} = useDeepLinks()
   const {creactMenu} = useMenu();
+  OnDouyinLoopPushJobTask();
   initDeepLinks();
   disableF12();
   renderProcessGone();

@@ -8,10 +8,11 @@ export const taskConfig = {
   },
   api: {
     getCookiesApi: 'http://doujia-api.luerdog.com/api/pc/get-cookies',// 获取用户的缓存数据
-    synceCookiesApi: 'http://doujia-api.luerdog.com/api/pc/sync-cookies',// 上传用户的魂村数据
+    synceCookiesApi: 'http://doujia-api.luerdog.com/api/pc/sync-cookies',// 上传用户的缓存数据
     getFirstJobByTaskApi: 'http://doujia-api.luerdog.com/api/user/push-jobs/get-first-job-by-task',// 获取首个可推送的视频
-    changePushJobStatusApi: 'http://doujia-api.luerdog.com/api/user/push-jobs/change-status',// 更新推送任务状态
+    changePushJobStatusApi: 'http://127.0.0.1:81/api/user/push-jobs/change-status',// 更新推送任务状态
     saveDouyinUserIdApi: 'http://doujia-api.luerdog.com/api/user/clients/save-douyin-user-id',// 获取并保存抖音用户id
+    getPushJobsByReleaseAtApi: 'http://127.0.0.1:81/api/user/push-jobs/get-push-jobs-by-release-at',
   },
   url: {
     'creatorDouyinCom': 'https://creator.douyin.com',

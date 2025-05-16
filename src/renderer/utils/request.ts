@@ -1,4 +1,5 @@
 import axios from "axios";
+
 const serves = axios.create({
   baseURL: __CONFIG__.BASE_API,
   timeout: 5000,
@@ -17,10 +18,10 @@ serves.interceptors.request.use(
 serves.interceptors.response.use(
   (res) => {
     // 设置接受数据之后，做什么处理
-    if (res.data.code === 50000) {
+    if (res.data.code !== 10000) {
       // ElMessage.error(res.data.data);
     }
-    return res;
+    return res.data;
   },
   (err) => {
     // 判断请求异常信息中是否含有超时timeout字符串

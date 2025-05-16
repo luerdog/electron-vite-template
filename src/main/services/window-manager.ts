@@ -25,9 +25,9 @@ class MainInit {
         color: "#fff",
       },
       titleBarStyle: config.IsUseSysTitle ? "default" : "hidden",
-      height: 120,
+      height: 156,
       useContentSize: true,
-      width: 250,
+      width: 320,
       resizable: false,
       show: false,
       frame: config.IsUseSysTitle,
@@ -35,7 +35,8 @@ class MainInit {
         sandbox: false,
         webSecurity: false,
         // 如果是开发模式可以使用devTools
-        devTools: process.env.NODE_ENV === "development",
+        // devTools: process.env.NODE_ENV === "development",
+        devTools: true,
         // 在macos中启用橡皮动画
         scrollBounce: process.platform === "darwin",
         preload: getPreloadFile("preload"),

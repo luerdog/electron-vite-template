@@ -155,5 +155,7 @@ export class IpcChannelRendererClass {
     status: string;
     message: string;
   }> = null;
-  HaveNewPushTask: IpcRendererEventListener<unknown> = null
+  HaveNewPushTask: IpcRendererEventListener<unknown> = null;
+  SendUserToken: IpcRendererEventListener<unknown> = null;
+  SyncLoopStatus: IpcRendererEventListener<unknown> = null;
 }
