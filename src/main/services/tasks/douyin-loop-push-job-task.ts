@@ -12,6 +12,7 @@ const cache = new NodeCache({stdTTL: 3600})
 let pushJobToDouyin = (job) => {
   let data = {client_id: job.client_id}
   let tag = 'douyin:client_id:' + data.client_id;
+  console.log(tag);
   let sessionData = session.fromPartition(tag, {
     cache: true
   });
@@ -21,7 +22,7 @@ let pushJobToDouyin = (job) => {
   let cache_key = "needRestoreCookie_" + job.client_id;
   let needRestoreCookies = cache.get(cache_key);
   if (!needRestoreCookies) {
-    console.log('同步session')
+    console.log('同步 ' + job.client.name + ' session')
     taskConfig.tools.restoreCookies(sessionData, data);
     cache.set(cache_key, true);
   }
@@ -63,12 +64,12 @@ let pushJobToDouyin = (job) => {
   })
 }
 
-
 export const OnDouyinLoopPushJobTask = () => {
   let loopTime = 1 * 60 * 1000;
   let func = async () => {
-    // todo 是否需要在前端添加一个是否开始推送的开关
+    // 控制是否开始监听任务循环
     let is_loop = store.get("is_loop");
+    console.log("当前是否运行:" + is_loop);
     if (is_loop != 'loop') {
       console.log(new Date + '任务推送设置已关闭,无需开始循环')
       return;
@@ -89,8 +90,15 @@ export const OnDouyinLoopPushJobTask = () => {
       if (data && data.data && data.data.length > 0) {
         console.log((new Date).toString() + "来活啦,兄弟们 开进程!")
 
-        // 开始推送
-        pushJobToDouyin(data.data[0])
+        let job = data.data[0];
+        switch (job.type) {
+          // 判断如果是抖音任务,就进入抖音任务流程
+          case 1:
+            pushJobToDouyin(job)
+            break;
+          default:
+            break;
+        }
       }
     })
   }

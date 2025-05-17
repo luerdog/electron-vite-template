@@ -1,21 +1,24 @@
 process.env.NODE_ENV = "production";
 
-import { join } from "path";
-import { say } from "cfonts";
-import { deleteAsync } from "del";
+import {join} from "path";
+import {say} from "cfonts";
+import {deleteAsync} from "del";
 import chalk from "chalk";
-import { rollup, OutputOptions } from "rollup";
-import { Listr } from "listr2";
+import {rollup, OutputOptions} from "rollup";
+import {Listr} from "listr2";
 import rollupOptions from "./rollup.config";
-import { errorLog, doneLog } from "./log";
-import { getArgv } from "./utils";
+import {errorLog, doneLog} from "./log";
+import {getArgv} from "./utils";
 
 const mainOpt = rollupOptions(process.env.NODE_ENV, "main");
+// 默认的preload.js
 const preloadOpt = rollupOptions(process.env.NODE_ENV, "preload");
+// todo 插入需要编译的preload.js
 const preloadDouyinAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "douyin_authorization");
+const preloadXiaohongshuAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "xiaohongshu_authorization");
 const preloadDouyinPushVideoOpt = rollupOptions(process.env.NODE_ENV, "douyin_push_video");
 
-const { clean = false, target = "client" } = getArgv();
+const {clean = false, target = "client"} = getArgv();
 const isCI = process.env.CI || false;
 
 if (target === "web") web();
@@ -58,7 +61,12 @@ async function unionBuild() {
         title: "building preload process",
         task: async () => {
           try {
-            let preloads = [preloadOpt, preloadDouyinAuthorizationOpt,preloadDouyinPushVideoOpt];
+            let preloads = [
+              preloadOpt,
+              preloadDouyinAuthorizationOpt,
+              preloadDouyinPushVideoOpt,
+              preloadXiaohongshuAuthorizationOpt
+            ];
             preloads.map(async (item) => {
               const build = await rollup(item);
               await build.write(item.output as OutputOptions);
@@ -73,8 +81,8 @@ async function unionBuild() {
         title: "building renderer process",
         task: async (_, tasks) => {
           try {
-            const { build } = await import("vite");
-            await build({ configFile: join(__dirname, "vite.config.mts") });
+            const {build} = await import("vite");
+            await build({configFile: join(__dirname, "vite.config.mts")});
             tasks.output = `take it away ${chalk.yellow(
               "`electron-builder`"
             )}\n`;
@@ -95,8 +103,8 @@ async function unionBuild() {
 
 async function web() {
   await deleteAsync(["dist/web/*", "!.gitkeep"]);
-  const { build } = await import("vite");
-  build({ configFile: join(__dirname, "vite.config.mts") }).then((res) => {
+  const {build} = await import("vite");
+  build({configFile: join(__dirname, "vite.config.mts")}).then((res) => {
     doneLog(`web build success`);
     process.exit();
   });

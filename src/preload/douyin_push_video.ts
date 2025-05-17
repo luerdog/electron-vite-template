@@ -208,7 +208,7 @@ function changeTitle(text) {
   if (!input) return;
 
   // 获取原始描述符
-  const descriptor = Object.getOwnPropertyDescriptor(
+  let descriptor = Object.getOwnPropertyDescriptor(
     HTMLInputElement.prototype,
     'value'
   );
@@ -260,7 +260,7 @@ async function changeArea(text) {
   dom.click()
 
   // 获取原始描述符
-  const descriptor = Object.getOwnPropertyDescriptor(
+  let descriptor = Object.getOwnPropertyDescriptor(
     HTMLInputElement.prototype,
     'value'
   );
@@ -383,10 +383,28 @@ async function timerSet(jobData) {
   let inputDom: HTMLInputElement = document.querySelector('input[placeholder="日期和时间"]');
   inputDom.click()
   inputDom.focus()
+  await delay(1000);
+
+  let descriptor = Object.getOwnPropertyDescriptor(
+    HTMLInputElement.prototype,
+    'value'
+  );
+
+  Object.defineProperty(inputDom, 'value', {
+    ...descriptor,
+    get: function () {
+      return jobData.release_at;
+    },
+    set: function () {
+    } // 阻止外部修改
+  });
+  await delay(1000);
 
   // 设置定时
   inputDom.value = jobData.release_at;
   inputDom.setAttribute("value", jobData.release_at);
+  await delay(1000);
+  console.log(inputDom);
 
   const event = new Event('input', {bubbles: true});
   inputDom.dispatchEvent(event);
@@ -492,7 +510,7 @@ async function runTask() {
     await delay(5000);
     // 判断是否是登录状态 不是的话 直接关闭
     if (hasText('扫码登录')) {
-      alert("抖音号:" + jobData.client.name + "授权可能过期了,前往授权页面查看/重新授权!");
+      console.log("抖音号:" + jobData.client.name + "授权可能过期了,前往授权页面查看/重新授权!");
       close();
     }
 

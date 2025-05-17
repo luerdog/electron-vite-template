@@ -2,19 +2,24 @@ import {onDouyinPushVideo} from "@main/services/tasks/douyin-push-video-task";
 import {onDouyinAuthorization} from "@main/services/tasks/douyin-authorization-task";
 import {onBindUser} from "@main/services/tasks/bind-user";
 import {onLoopPushTaskController} from "@main/services/tasks/loop-push-task-controller-task";
+import {onXiaohongshuAuthorization} from "@main/services/tasks/xiaohongshu-authorization-task";
 
 export const useTasks = () => {
   return {
     initTask: (data) => {
       switch (data.type) {
-        // 抖音客户绑定
+        // 抖音客户绑定授权
         case 'douyin_authorization':
           onDouyinAuthorization(data);
           break;
-        // 已弃用
-        case 'douyin_push_video':
-          onDouyinPushVideo(data);
+        // 小红书客户绑定授权
+        case 'xiaohongshu_authorization':
+          onXiaohongshuAuthorization(data);
           break;
+        // 已弃用
+        // case 'douyin_push_video':
+        //   onDouyinPushVideo(data);
+        //   break;
         // 员工绑定
         case 'bind_user':
           onBindUser(data)

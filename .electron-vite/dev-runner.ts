@@ -3,21 +3,22 @@ process.env.NODE_ENV = "development";
 import readline from "node:readline";
 import electron from "electron";
 import chalk from "chalk";
-import { join } from "path";
-import { watch } from "rollup";
+import {join} from "path";
+import {watch} from "rollup";
 import Portfinder from "portfinder";
 import config from "../config";
-import { say } from "cfonts";
-import { spawn } from "child_process";
-import type { ChildProcess } from "child_process";
+import {say} from "cfonts";
+import {spawn} from "child_process";
+import type {ChildProcess} from "child_process";
 import rollupOptions from "./rollup.config";
-import { electronLog, getArgv, logStats, removeJunk } from "./utils";
+import {electronLog, getArgv, logStats, removeJunk} from "./utils";
 
-const { target = "client", controlledRestart = false } = getArgv();
+const {target = "client", controlledRestart = false} = getArgv();
 
 const mainOpt = rollupOptions(process.env.NODE_ENV, "main");
 const preloadOpt = rollupOptions(process.env.NODE_ENV, "preload");
 const preloadDouyinAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "douyin_authorization");
+const preloadXiaohongshuAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "xiaohongshu_authorization");
 const preloadDouyinPushVideoOpt = rollupOptions(process.env.NODE_ENV, "douyin_push_video");
 
 let electronProcess: ChildProcess | null = null;
@@ -60,7 +61,7 @@ const shortcutList: Shortcut[] = [
 async function startRenderer(): Promise<void> {
   Portfinder.basePort = config.dev.port || 9080;
   const port = await Portfinder.getPortPromise();
-  const { createServer } = await import("vite");
+  const {createServer} = await import("vite");
   const server = await createServer({
     configFile: join(__dirname, "vite.config.mts"),
   });
@@ -68,14 +69,14 @@ async function startRenderer(): Promise<void> {
   await server.listen(port);
   console.log(
     "\n\n" +
-      chalk.blue(
-        `${
-          config.dev.chineseLog
-            ? "  正在准备主进程，请等待..."
-            : "  Preparing main process, please wait..."
-        }`
-      ) +
-      "\n\n"
+    chalk.blue(
+      `${
+        config.dev.chineseLog
+          ? "  正在准备主进程，请等待..."
+          : "  Preparing main process, please wait..."
+      }`
+    ) +
+    "\n\n"
   );
 }
 
@@ -117,17 +118,22 @@ function startMain(): Promise<void> {
 function startPreload(): Promise<void> {
   console.log(
     "\n\n" +
-      chalk.blue(
-        `${
-          config.dev.chineseLog
-            ? "  正在准备预加载脚本，请等待..."
-            : "  Preparing preLoad File, please wait..."
-        }`
-      ) +
-      "\n\n"
+    chalk.blue(
+      `${
+        config.dev.chineseLog
+          ? "  正在准备预加载脚本，请等待..."
+          : "  Preparing preLoad File, please wait..."
+      }`
+    ) +
+    "\n\n"
   );
   return new Promise((resolve, reject) => {
-    let preloads = [preloadOpt, preloadDouyinAuthorizationOpt,preloadDouyinPushVideoOpt];
+    let preloads = [
+      preloadOpt,
+      preloadDouyinAuthorizationOpt,
+      preloadXiaohongshuAuthorizationOpt,
+      preloadDouyinPushVideoOpt
+    ];
     preloads.map(async preload => {
       const PreloadWatcher = watch(preload);
       PreloadWatcher.on("change", (filename) => {

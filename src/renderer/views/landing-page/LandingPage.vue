@@ -15,6 +15,8 @@
         <div v-else>当前任务监听状态:关闭</div>
       </div>
     </div>
+
+    <div id="set-tag" v-if="set_tag_show">🔄</div>
   </section>
 </template>
 
@@ -27,24 +29,23 @@ const {ipcRendererChannel} = window;
 const getUserInfoSecond = 1000 * 60 * 60 * 6;
 
 let msgText = "等待任务推送";
-let haveNewPushTaskMsg = "有新任务,准备执行!"
 
 let msg = ref(msgText);
 let user_name = ref('等待用户授权')
 let user_avatar = ref();
 let is_loop = ref(false);
+let set_tag_show = ref(false);
 
 ipcRendererChannel.HaveNewPushTask.on(() => {
-  msg.value = haveNewPushTaskMsg;
+  set_tag_show.value = true;
   setTimeout(() => {
-    msg.value = msgText;
-  }, 2500)
+    set_tag_show.value = false;
+  }, 1500)
 })
 
 let getUserInfo = () => {
   let user_token = localStorage.getItem('user_token');
   if (!user_token) return;
-
   getUserInfoData(user_token).then(data => {
     console.log(data)
     user_name.value = data.data.name;
@@ -92,6 +93,12 @@ ipcRendererChannel.SyncLoopStatus.on((event, arg): void => {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+#set-tag {
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
 }
 
 .main {
