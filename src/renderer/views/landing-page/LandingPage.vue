@@ -71,6 +71,7 @@ let getLoopStatus = () => {
 
   is_loop.value = true;
 }
+getLoopStatus();
 
 
 ipcRendererChannel.SendUserToken.on((event, arg): void => {

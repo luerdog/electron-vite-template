@@ -21,7 +21,7 @@ let pushJobToDouyin = (job) => {
   let needRestoreCookies = cache.get("needRestoreCookie");
   if (!needRestoreCookies) {
     console.log('同步session')
-    taskConfig.tools.restoreCookies(sessionData, data);
+    taskConfig.tools.restoreDouyinCookies(sessionData, data);
     cache.set("needRestoreCookie", true);
   }
 

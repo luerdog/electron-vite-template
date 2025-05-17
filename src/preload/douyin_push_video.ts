@@ -1,5 +1,6 @@
 // 抖音创作平台绕过浏览器验证
 import {taskConfig} from "@main/services/tasks/config";
+import funcTool from "./funcTool";
 
 let douyin_has_shown = localStorage.getItem('douyin-creator-browser-check__has_shown')
 if (!douyin_has_shown) {
@@ -9,195 +10,23 @@ if (!douyin_has_shown) {
 }
 
 // 创建悬浮框
-function createFloatingBox(initialContent) {
-  // 检查是否已存在悬浮框
-  if (document.getElementById('floating-box')) {
-    console.warn('悬浮框已经存在');
-    return;
-  }
-
-  // 创建悬浮框元素
-  const floatingBox = document.createElement('div');
-  floatingBox.id = 'floating-box';
-
-  // 使用JS设置样式
-  Object.assign(floatingBox.style, {
-    position: 'fixed',
-    top: '50%',
-    right: '0',
-    transform: 'translateY(-50%)',
-    width: '200px',
-    padding: '15px',
-    backgroundColor: '#f8f9fa',
-    border: '1px solid #dee2e6',
-    borderRight: 'none',
-    borderTopLeftRadius: '5px',
-    borderBottomLeftRadius: '5px',
-    boxShadow: '-2px 0 5px rgba(0, 0, 0, 0.1)',
-    zIndex: '9999',
-    transition: 'all 0.3s ease'
-  });
-
-  // 创建标题
-  const title = document.createElement('h3');
-  title.textContent = '操作提示';
-  Object.assign(title.style, {
-    marginTop: '0',
-    color: '#343a40',
-    fontSize: '16px'
-  });
-
-  // 创建内容区域
-  const content = document.createElement('div');
-  content.id = 'floating-content';
-  content.textContent = initialContent || '这是默认内容';
-  Object.assign(content.style, {
-    margin: '10px 0',
-    color: '#495057',
-    fontSize: '14px'
-  });
-
-  // 创建关闭按钮
-  const closeBtn = document.createElement('button');
-  closeBtn.textContent = '×';
-  closeBtn.title = '关闭';
-  Object.assign(closeBtn.style, {
-    position: 'absolute',
-    top: '5px',
-    right: '5px',
-    background: 'none',
-    border: 'none',
-    fontSize: '16px',
-    cursor: 'pointer',
-    color: '#6c757d',
-    padding: '0',
-    width: '20px',
-    height: '20px',
-    lineHeight: '20px'
-  });
-
-  // 组装元素
-  floatingBox.appendChild(closeBtn);
-  floatingBox.appendChild(title);
-  floatingBox.appendChild(content);
-  document.body.appendChild(floatingBox);
-
-  // 添加关闭按钮事件
-  closeBtn.addEventListener('click', function () {
-    floatingBox.style.display = 'none';
-  });
-
-  // // 添加悬停效果
-  // floatingBox.addEventListener('mouseenter', function () {
-  //   floatingBox.style.right = '0';
-  // });
-  //
-  // floatingBox.addEventListener('mouseleave', function () {
-  //   floatingBox.style.right = '-170px';
-  // });
-  //
-  // // 初始状态半隐藏
-  // floatingBox.style.right = '-170px';
-
-  // 返回更新内容的方法
-  return {
-    updateContent: function (newContent) {
-      content.textContent = newContent;
-    },
-    updateHtmlContent: function (html) {
-      content.innerHTML = html;
-    },
-    show: function () {
-      floatingBox.style.display = 'block';
-      floatingBox.style.right = '0';
-    },
-    hide: function () {
-      floatingBox.style.display = 'none';
-    },
-    toggle: function () {
-      if (floatingBox.style.display === 'none') {
-        this.show();
-      } else {
-        this.hide();
-      }
-    }
-  };
-}
-
-async function scrollToCreatorModal(element: HTMLElement) {
-  try {
-    element.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
-  } catch (error) {
-    // 备用方案（如果浏览器不支持平滑滚动）
-    console.warn('平滑滚动不支持，使用普通滚动');
-    // element.scrollIntoView();
-  }
-
-  await delay(500);
-}
-
+let createFloatingBox = funcTool.createFloatingBox;
+// 滑动到指定元素的位置
+let scrollToCreatorModal = funcTool.scrollToCreatorModal;
 // 按时间堵塞
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// 监听dom堵塞
-/**
- * 异步阻塞等待，直到指定选择器的元素出现在DOM中
- * @param {string} selector - CSS选择器 (如 ".my-class" 或 "#my-id")
- * @param {number} [timeout=30000] - 超时时间(毫秒)，默认30秒
- * @param {number} [checkInterval=100] - 检查间隔(毫秒)，默认100ms
- * @returns {Promise<Element>} 返回解析为找到的元素的Promise
- * @throws {Error} 如果超时未找到元素
- */
-function waitForElement(selector, timeout = 30000, checkInterval = 100) {
-  return new Promise((resolve, reject) => {
-    const startTime = Date.now();
-
-    // 立即检查一次
-    const element = document.querySelector(selector);
-    if (element) {
-      return resolve(element);
-    }
-
-    // 设置定时器定期检查
-    const interval = setInterval(async () => {
-      const element = document.querySelector(selector);
-
-      if (element) {
-        clearInterval(interval);
-        await delay(1000);
-        resolve(element);
-      } else if (Date.now() - startTime >= timeout) {
-        clearInterval(interval);
-        reject(new Error(`等待元素 "${selector}" 超时 (${timeout}ms)`));
-      }
-    }, checkInterval);
-  });
-}
-
-/**
- * 堵塞等待 直到指定元素消失
- * @param selector
- * @param checkInterval
- */
-function waitForElementToDisappear(selector, checkInterval = 100) {
-  return new Promise((resolve) => {
-    function checkElement() {
-      const element = document.querySelector(selector);
-      if (!element) {
-        resolve(element);
-      } else {
-        setTimeout(checkElement, checkInterval); // 每100毫秒检查一次
-      }
-    }
-
-    checkElement();
-  });
-}
+let delay = funcTool.delay
+// 堵塞等待指定元素出现
+let waitForElement = funcTool.waitForElement;
+// 堵塞等待指定元素消失
+let waitForElementToDisappear = funcTool.waitForElementToDisappear;
+// 通过文本高效获取节点dom
+let getParentOfElementWithText = funcTool.getParentOfElementWithText;
+// 获取任务的数据
+let getJobData = funcTool.getJobData;
+// 等待指定文字出现
+let waitForText = funcTool.waitForText;
+//  查询页面是否存在指定文字
+let hasText = funcTool.hasText;
 
 function changeTitle(text) {
   let inputDoms = Array.from(document.querySelectorAll('input'))
@@ -230,25 +59,6 @@ function changeTitle(text) {
   // 触发事件
   const event = new Event('input', {bubbles: true});
   input.dispatchEvent(event);
-}
-
-
-// 通过文本高效获取节点dom
-function getParentOfElementWithText(text) {
-  const treeWalker = document.createTreeWalker(
-    document.body,
-    NodeFilter.SHOW_TEXT
-  );
-
-  while (treeWalker.nextNode()) {
-    const textNode = treeWalker.currentNode;
-    if (textNode.nodeValue.trim() === text) {
-      // 返回文本节点的父元素
-      return textNode.parentElement;
-    }
-  }
-
-  return null;
 }
 
 async function changeArea(text) {
@@ -337,7 +147,7 @@ function changeDescription(text) {
 
 async function pushVideo() {
   // 1. 获取线上资源
-  const response = await fetch('http://typora-sync.luerdog.com/cloudsync/2025_3_29.mp4');
+  const response = await fetch(jobData.video_url);
   if (!response.ok) throw new Error('网络请求失败');
   // 2. 转换为 Blob
   const blob = await response.blob();
@@ -464,41 +274,7 @@ async function submit() {
   dom.click()
 }
 
-function getJobData() {
-  const rawArgs = process.argv
-  const dataIndex = rawArgs.indexOf('--job-data') + 1
-  return JSON.parse(rawArgs[dataIndex])
-}
-
-function waitForText(text, timeout = 30000, interval = 100) {
-  return new Promise((resolve, reject) => {
-    const startTime = Date.now();
-
-    const check = () => {
-      // 检查整个文档中是否包含指定文本
-      if (document.body.textContent.includes(text)) {
-        resolve(text);
-        return;
-      }
-
-      // 检查是否超时
-      if (Date.now() - startTime > timeout) {
-        reject(new Error(`等待文本"${text}"超时`));
-        return;
-      }
-
-      // 继续检查
-      setTimeout(check, interval);
-    };
-
-    // 开始检查
-    check();
-  });
-}
-
-function hasText(text) {
-  return document.body.textContent.includes(text);
-}
+let jobData = getJobData();
 
 async function runTask() {
   // 初始化悬浮框
@@ -506,8 +282,7 @@ async function runTask() {
 
   try {
     floatingBox.updateContent('正在获取推送任务数据!');
-    let jobData = getJobData();
-    await delay(5000);
+    await delay(2000);
     // 判断是否是登录状态 不是的话 直接关闭
     if (hasText('扫码登录')) {
       console.log("抖音号:" + jobData.client.name + "授权可能过期了,前往授权页面查看/重新授权!");

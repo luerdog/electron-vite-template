@@ -17,6 +17,7 @@ const preloadOpt = rollupOptions(process.env.NODE_ENV, "preload");
 const preloadDouyinAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "douyin_authorization");
 const preloadXiaohongshuAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "xiaohongshu_authorization");
 const preloadDouyinPushVideoOpt = rollupOptions(process.env.NODE_ENV, "douyin_push_video");
+const preloadXiaohongshuPushVideoOpt = rollupOptions(process.env.NODE_ENV, "xiaohongshu_push_video");
 
 const {clean = false, target = "client"} = getArgv();
 const isCI = process.env.CI || false;
@@ -64,8 +65,9 @@ async function unionBuild() {
             let preloads = [
               preloadOpt,
               preloadDouyinAuthorizationOpt,
+              preloadXiaohongshuAuthorizationOpt,
               preloadDouyinPushVideoOpt,
-              preloadXiaohongshuAuthorizationOpt
+              preloadXiaohongshuPushVideoOpt,
             ];
             preloads.map(async (item) => {
               const build = await rollup(item);

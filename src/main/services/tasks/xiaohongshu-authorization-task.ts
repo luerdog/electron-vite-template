@@ -5,14 +5,14 @@ import {getPreloadFile} from "@main/config/static-path";
 import axios from "axios";
 import querystring from "node:querystring";
 
-export const onXiaohongshuAuthorization = (data) => {
+export const onXiaohongshuAuthorization = async (data) => {
   let tag = 'xiaoshouhuo:session_tag:' + data.session_tag;
   console.log(tag);
   let sessionData = session.fromPartition(tag, {
     cache: true
   });
 
-  if (data.client_id) taskConfig.tools.restoreXiaohongshuCookies(sessionData, data);
+  if (data.client_id) await taskConfig.tools.restoreXiaohongshuCookies(sessionData, data);
 
   const childWin = new BrowserWindow({
     titleBarStyle: config.IsUseSysTitle ? "default" : "hidden",
@@ -41,7 +41,7 @@ export const onXiaohongshuAuthorization = (data) => {
     childWin.webContents.openDevTools({mode: "undocked", activate: true});
   }
   let douyinCreativeUrl = taskConfig.url.creatorXiaohongshuCom
-  childWin.loadURL(douyinCreativeUrl);
+  await childWin.loadURL(douyinCreativeUrl);
   childWin.once("ready-to-show", () => {
     childWin.show();
   });
@@ -57,7 +57,7 @@ export const onXiaohongshuAuthorization = (data) => {
     };
     let apiurl = taskConfig.api.synceCookiesApi;
     // 发送请求
-    axios.post(apiurl, querystring.stringify(params), {
+    await axios.post(apiurl, querystring.stringify(params), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         // 可添加其他请求头

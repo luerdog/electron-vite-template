@@ -20,6 +20,7 @@ const preloadOpt = rollupOptions(process.env.NODE_ENV, "preload");
 const preloadDouyinAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "douyin_authorization");
 const preloadXiaohongshuAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "xiaohongshu_authorization");
 const preloadDouyinPushVideoOpt = rollupOptions(process.env.NODE_ENV, "douyin_push_video");
+const preloadXiaohongshuPushVideoOpt = rollupOptions(process.env.NODE_ENV, "xiaohongshu_push_video");
 
 let electronProcess: ChildProcess | null = null;
 let manualRestart = false;
@@ -132,7 +133,8 @@ function startPreload(): Promise<void> {
       preloadOpt,
       preloadDouyinAuthorizationOpt,
       preloadXiaohongshuAuthorizationOpt,
-      preloadDouyinPushVideoOpt
+      preloadDouyinPushVideoOpt,
+      preloadXiaohongshuPushVideoOpt
     ];
     preloads.map(async preload => {
       const PreloadWatcher = watch(preload);

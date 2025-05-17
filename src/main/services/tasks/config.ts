@@ -1,19 +1,21 @@
 import axios from "axios";
 import querystring from "node:querystring";
 
+let domain = 'http://127.0.0.1:81';
+
 export const taskConfig = {
   window: {
     width: 1280,
     height: 900,
   },
   api: {
-    getCookiesApi: 'http://127.0.0.1:81/api/pc/get-cookies',// 获取用户的缓存数据
-    synceCookiesApi: 'http://127.0.0.1:81/api/pc/sync-cookies',// 上传用户的缓存数据
-    getFirstJobByTaskApi: 'http://doujia-api.luerdog.com/api/user/push-jobs/get-first-job-by-task',// 获取首个可推送的视频
-    changePushJobStatusApi: 'http://doujia-api.luerdog.com/api/user/push-jobs/change-status',// 更新推送任务状态
-    saveDouyinUserIdApi: 'http://doujia-api.luerdog.com/api/user/clients/save-douyin-user-id',// 获取并保存抖音用户id
-    getPushJobsByReleaseAtApi: 'http://doujia-api.luerdog.com/api/user/push-jobs/get-push-jobs-by-release-at',// 根据发布日期获取最近的一个推送子任务
-    saveXiaohongshuClientInfoApi: 'http://127.0.0.1:81/api/user/clients/save-xiaohongshu-client-info'
+    getCookiesApi: domain + '/api/pc/get-cookies',// 获取用户的缓存数据
+    synceCookiesApi: domain + '/api/pc/sync-cookies',// 上传用户的缓存数据
+    getFirstJobByTaskApi: domain + '/api/user/push-jobs/get-first-job-by-task',// 获取首个可推送的视频
+    changePushJobStatusApi: domain + '/api/user/push-jobs/change-status',// 更新推送任务状态
+    saveDouyinUserIdApi: domain + '/api/user/clients/save-douyin-user-id',// 获取并保存抖音用户id
+    getPushJobsByReleaseAtApi: domain + '/api/user/push-jobs/get-push-jobs-by-release-at',// 根据发布日期获取最近的一个推送子任务
+    saveXiaohongshuClientInfoApi: domain + '/api/user/clients/save-xiaohongshu-client-info'
   },
   url: {
     'creatorDouyinCom': 'https://creator.douyin.com',
@@ -129,14 +131,18 @@ export const taskConfig = {
           const cookiesData = response.data.data.cookies;
           const cookies = JSON.parse(cookiesData);
           for (const cookie of cookies) {
-            if (!cookie.url) {
-              // cookie.url = 'https://creator.douyin.com/'
-              cookie.url = taskConfig.url.creatorDouyinCom
-            }
+            try {
+              if (!cookie.url) {
+                // cookie.url = 'https://creator.douyin.com/'
+                cookie.url = taskConfig.url.creatorDouyinCom
+              }
 
-            // 排除非本域
-            if (cookie.domain.indexOf('douyin.com') == -1) continue;
-            await sessionData.cookies.set(cookie);
+              // 排除非本域
+              // if (cookie.domain.indexOf('douyin.com') == -1) continue;
+              await sessionData.cookies.set(cookie);
+            } catch (error) {
+              continue;
+            }
           }
         })
       } catch (error) {
