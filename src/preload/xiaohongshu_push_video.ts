@@ -60,6 +60,90 @@ let pushVideo = async (jobData) => {
   }
 }
 
+// 设置封面
+let setCover = async (jobData) => {
+  let dom = getParentOfElementWithText('设置封面')
+  dom.click();
+
+  await waitForElement('#workspace')
+
+  const workspace = document.getElementById('workspace');
+  const inputs = Array.from(workspace.parentNode.children)
+    .filter(el => el !== workspace && el.tagName === 'INPUT');
+
+  let targetInput = inputs[0] as HTMLInputElement;
+
+  // 3. 获取图片并伪造 File 对象
+  try {
+    let cover_url = jobData.cover_url;
+    cover_url = cover_url.replace('http://', 'https://');
+    // (1) 获取图片 Blob
+    const response = await fetch(cover_url);
+    const blob = await response.blob();
+    await delay(2000);
+    // (2) 创建 File 对象（模拟用户上传的文件）
+    const file = new File([blob], 'fake-image.png', {type: blob.type});
+
+    // (3) 创建 DataTransfer 模拟文件选择
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    await delay(1000);
+
+    // (4) 注入到 input
+    targetInput.files = dataTransfer.files;
+
+    // (5) 触发 change 事件（某些组件依赖这个事件）
+    const event = new Event('change', {bubbles: true});
+    targetInput.dispatchEvent(event);
+    await delay(2000);
+    console.log('图片已成功注入 input', targetInput.files);
+  } catch (error) {
+    console.error('伪造图片失败:', error);
+  }
+  await delay(2000);
+
+  let overDom = getParentOfElementWithText('确定')
+
+  overDom.click()
+  await waitForElementToDisappear('#workspace')
+}
+
+let setTitle = async (jobData) => {
+  let inputDoms = Array.from(document.querySelectorAll('input'))
+
+  let input = inputDoms.find(dom => {
+    return dom.placeholder == '填写标题会有更多赞哦～'
+  });
+
+  if (!input) return;
+
+  let text = jobData.title;
+  input.value = text
+  // 获取原始描述符
+  let descriptor = Object.getOwnPropertyDescriptor(
+    HTMLInputElement.prototype,
+    'value'
+  );
+
+  // 重定义 value 属性
+  Object.defineProperty(input, 'value', {
+    ...descriptor,
+    get: function () {
+      return text;
+    },
+    set: function () {
+    } // 阻止外部修改
+  });
+
+  // 更新 UI 显示
+  input.setAttribute('value', text);
+  input.value = text
+
+  // 触发事件
+  const event = new Event('input', {bubbles: true});
+  input.dispatchEvent(event);
+}
+
 let runTask = async () => {
   // 初始化悬浮框
   const floatingBox = createFloatingBox('初始内容');
@@ -79,21 +163,22 @@ let runTask = async () => {
   await waitForText('发布笔记')
   floatingBox.updateContent("点击发布视频");
 
-  let dom1 = getParentOfElementWithText('发布笔记');
-  dom1.click()
-  await delay(2000);
-  let dom2 = getParentOfElementWithText('首页');
-  dom2.click()
-  await delay(2000);
-  dom1.click()
+  let dom = getParentOfElementWithText('发布笔记');
+  dom.click()
 
   floatingBox.updateContent('正在上传视频')
-
+  await delay(1000);
   await pushVideo(jobData);
 
-  console.log('进行下一步了')
+  await waitForText("封面设置")
 
-  await delay(5000);
+  floatingBox.updateContent('正在设置封面');
+  await delay(1000);
+  await setCover(jobData);
+
+  floatingBox.updateContent('正在设置标题');
+  await delay(1000);
+  await setTitle(jobData);
 }
 
 

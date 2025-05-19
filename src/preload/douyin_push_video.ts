@@ -218,7 +218,6 @@ async function timerSet(jobData) {
   console.log(inputDom);
 
   const event = new Event('input', {bubbles: true});
-  event.preventDefault();
   inputDom.dispatchEvent(event);
 }
 
