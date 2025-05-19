@@ -193,8 +193,9 @@ async function timerSet(jobData) {
   let inputDom: HTMLInputElement = document.querySelector('input[placeholder="日期和时间"]');
   inputDom.click()
   inputDom.focus()
-  await delay(1000);
+  await delay(1500);
 
+  inputDom.value = jobData.release_at;
   let descriptor = Object.getOwnPropertyDescriptor(
     HTMLInputElement.prototype,
     'value'
@@ -208,7 +209,7 @@ async function timerSet(jobData) {
     set: function () {
     } // 阻止外部修改
   });
-  await delay(1000);
+  await delay(1500);
 
   // 设置定时
   inputDom.value = jobData.release_at;

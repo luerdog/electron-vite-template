@@ -8,7 +8,7 @@ const cache = new NodeCache({stdTTL: 3600})
 
 let pushVideoToXiaohongshu = async (job) => {
   let data = {client_id: job.client_id}
-  let tag = 'xiaoshouhuo:session_tag:' + job.client.session_tag;
+  let tag = 'persite:xiaoshouhuo:session_tag:' + job.client.session_tag;
   let sessionData = session.fromPartition(tag, {
     cache: true
   });

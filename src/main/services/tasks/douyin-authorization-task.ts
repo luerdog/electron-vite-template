@@ -4,9 +4,12 @@ import config from "@config/index";
 import {getPreloadFile} from "@main/config/static-path";
 import axios from "axios";
 import querystring from "node:querystring";
+import NodeCache from "node-cache";
+
+const cache = new NodeCache({stdTTL: 3600})
 
 export const onDouyinAuthorization = async (data) => {
-  let tag = 'douyin:client_id:' + data.client_id;
+  let tag = 'persite:douyin:client_id:' + data.client_id;
   let sessionData = session.fromPartition(tag, {
     cache: true
   });
@@ -66,5 +69,9 @@ export const onDouyinAuthorization = async (data) => {
         'User-Agent': 'NodeJS-SyncClient/1.0'
       }
     })
+
+    // 即在本地授权 又在本地使用 就直接加缓存了
+    let cache_key = "needRestoreCookie_" + data.client_id;
+    cache.set(cache_key, true)
   });
 }

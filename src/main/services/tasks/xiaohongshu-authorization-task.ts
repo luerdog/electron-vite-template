@@ -4,9 +4,12 @@ import config from "@config/index";
 import {getPreloadFile} from "@main/config/static-path";
 import axios from "axios";
 import querystring from "node:querystring";
+import NodeCache from "node-cache";
+
+const cache = new NodeCache({stdTTL: 3600})
 
 export const onXiaohongshuAuthorization = async (data) => {
-  let tag = 'xiaoshouhuo:session_tag:' + data.session_tag;
+  let tag = 'persite:xiaoshouhuo:session_tag:' + data.session_tag;
   console.log(tag);
   let sessionData = session.fromPartition(tag, {
     cache: true
@@ -65,5 +68,9 @@ export const onXiaohongshuAuthorization = async (data) => {
         'User-Agent': 'NodeJS-SyncClient/1.0'
       }
     })
+
+    // 即在本地授权 又在本地使用 就直接加缓存了
+    let cache_key = "needRestoreCookie_" + data.client_id;
+    cache.set(cache_key, true)
   });
 }

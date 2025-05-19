@@ -8,7 +8,7 @@ const cache = new NodeCache({stdTTL: 3600})
 
 let pushVideoToDouyin = async (job) => {
   let data = {client_id: job.client_id}
-  let tag = 'douyin:client_id:' + data.client_id;
+  let tag = 'persite:douyin:client_id:' + data.client_id;
   let sessionData = session.fromPartition(tag, {
     cache: true
   });
