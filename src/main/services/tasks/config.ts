@@ -91,23 +91,25 @@ export const taskConfig = {
             'User-Agent': 'NodeJS-SyncClient/1.0'
           }
         }).then(async (response) => {
+          if (!response.data.data) return;
           const cookiesData = response.data.data.cookies;
+
           const cookies = JSON.parse(cookiesData);
           for (const cookie of cookies) {
             try {
               if (!cookie.url) {
-                // cookie.url = 'https://creator.douyin.com/'
                 cookie.url = taskConfig.url.creatorXiaohongshuCom
               }
-              //
-              // // 排除非本域
-              // if (cookie.domain.indexOf('douyin.com') == -1) continue;
+
               await sessionData.cookies.set(cookie);
             } catch (error) {
+              console.error(error);
               continue;
             }
           }
-        })
+        }).catch(error => {
+          console.log(error);
+        });
       } catch (error) {
         console.log(error)
       }

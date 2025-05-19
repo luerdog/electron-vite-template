@@ -220,6 +220,16 @@ let funcTool = {
   },
   hasText: (text) => {
     return document.body.textContent.includes(text);
+  },
+  handleBeforeUnload: (event) => {
+    event.preventDefault();
+    event.returnValue = "";
+  },
+  canreload: () => {
+    window.removeEventListener('beforeunload', funcTool.handleBeforeUnload);
+  },
+  cannotreload: () => {
+    window.addEventListener('beforeunload', funcTool.handleBeforeUnload);
   }
 }
 

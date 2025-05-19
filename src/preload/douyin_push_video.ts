@@ -145,7 +145,7 @@ function changeDescription(text) {
   }
 }
 
-async function pushVideo() {
+async function pushVideo(jobData) {
   // 1. 获取线上资源
   const response = await fetch(jobData.video_url);
   if (!response.ok) throw new Error('网络请求失败');
@@ -213,10 +213,12 @@ async function timerSet(jobData) {
   // 设置定时
   inputDom.value = jobData.release_at;
   inputDom.setAttribute("value", jobData.release_at);
-  await delay(1000);
+  await delay(2000);
+  console.log('定时器控件');
   console.log(inputDom);
 
   const event = new Event('input', {bubbles: true});
+  event.preventDefault();
   inputDom.dispatchEvent(event);
 }
 
@@ -274,9 +276,9 @@ async function submit() {
   dom.click()
 }
 
-let jobData = getJobData();
 
 async function runTask() {
+  let jobData = getJobData();
   // 初始化悬浮框
   const floatingBox = createFloatingBox('初始内容');
 
@@ -301,7 +303,7 @@ async function runTask() {
 
     floatingBox.updateContent('正在上传视频')
     //推送视频到组件
-    await pushVideo();
+    await pushVideo(jobData);
 
 
     await waitForElement('.editor-kit-root-container')
@@ -353,7 +355,7 @@ async function runTask() {
         await taskConfig.tools.changePushJobStatus(jobData.id)
 
         await delay(1000);
-        close();
+        // close();
       }
     }, 100)
   } catch (err) {

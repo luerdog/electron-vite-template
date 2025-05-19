@@ -35,8 +35,8 @@ class MainInit {
         sandbox: false,
         webSecurity: false,
         // 如果是开发模式可以使用devTools
-        // devTools: process.env.NODE_ENV === "development",
-        devTools: true,
+        devTools: process.env.NODE_ENV === "development",
+        // devTools: true,
         // 在macos中启用橡皮动画
         scrollBounce: process.platform === "darwin",
         preload: getPreloadFile("preload"),

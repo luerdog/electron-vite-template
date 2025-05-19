@@ -36,7 +36,7 @@ let pushVideoToXiaohongshu = async (job) => {
     webPreferences: {
       session: sessionData,
       sandbox: false,
-      webSecurity: false,
+      webSecurity: true,
       // 如果是开发模式可以使用devTools
       devTools: process.env.NODE_ENV === "development",
       // 在macos中启用橡皮动画
@@ -45,16 +45,17 @@ let pushVideoToXiaohongshu = async (job) => {
       additionalArguments: ['--job-data', JSON.stringify(job)]
     },
   });
-
+  childWin.webContents.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
   // 开发模式下自动开启devtools
   if (process.env.NODE_ENV === "development") {
     childWin.webContents.openDevTools({mode: "undocked", activate: true});
   }
-  let douyinCreativeUrl = taskConfig.url.creatorXiaohongshuCom
-  await childWin.loadURL(douyinCreativeUrl);
+  let xiaohongshuCreativeUrl = taskConfig.url.creatorXiaohongshuCom
+  childWin.loadURL(xiaohongshuCreativeUrl).catch((error) => {
+    console.log("报错原因:" + error)
+  });
   childWin.once("ready-to-show", () => {
     childWin.show();
-    childWin.focus();
   });
 
   // 监听窗口的关闭事件  当关闭的时候  开始下一个job

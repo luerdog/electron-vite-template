@@ -27,7 +27,7 @@ export const onXiaohongshuAuthorization = async (data) => {
     webPreferences: {
       session: sessionData,
       sandbox: false,
-      webSecurity: false,
+      webSecurity: true,
       // 如果是开发模式可以使用devTools
       devTools: process.env.NODE_ENV === "development",
       // 在macos中启用橡皮动画
@@ -41,7 +41,8 @@ export const onXiaohongshuAuthorization = async (data) => {
     childWin.webContents.openDevTools({mode: "undocked", activate: true});
   }
   let douyinCreativeUrl = taskConfig.url.creatorXiaohongshuCom
-  await childWin.loadURL(douyinCreativeUrl);
+  childWin.loadURL(douyinCreativeUrl).catch((err) => {
+  });
   childWin.once("ready-to-show", () => {
     childWin.show();
   });

@@ -41,7 +41,8 @@ export const onDouyinAuthorization = async (data) => {
     childWin.webContents.openDevTools({mode: "undocked", activate: true});
   }
   let douyinCreativeUrl = taskConfig.url.creatorDouyinCom
-  await childWin.loadURL(douyinCreativeUrl);
+  childWin.loadURL(douyinCreativeUrl).catch(error => {
+  });
   childWin.once("ready-to-show", () => {
     childWin.show();
   });
