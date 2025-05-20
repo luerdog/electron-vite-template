@@ -9,6 +9,7 @@ import NodeCache from "node-cache";
 const cache = new NodeCache({stdTTL: 3600})
 
 export const onXiaohongshuAuthorization = async (data) => {
+  console.log(data);
   let tag = 'persite:xiaoshouhuo:session_tag:' + data.session_tag;
   console.log(tag);
   let sessionData = session.fromPartition(tag, {

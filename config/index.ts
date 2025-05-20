@@ -1,7 +1,7 @@
 export default {
   build: {
     // todo 修改为正式的更新资源存放地址
-    hotPublishUrl: "http://douyin-pc-upload.dd",
+    hotPublishUrl: "http://doujia-api.luerdog.com/update",
     hotPublishConfigName: "update-config",
   },
   dev: {

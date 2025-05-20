@@ -2,6 +2,7 @@ import Store from 'electron-store'
 import {taskConfig} from "@main/services/tasks/config";
 import pushVideoToDouyin from "@main/services/tasks/handles/pushVideoToDouyin";
 import pushVideoToXiaohongshu from "@main/services/tasks/handles/pushVideoToXiaohongshu";
+import {dialog} from "electron";
 
 const store = new Store();
 
@@ -48,6 +49,16 @@ export const OnDouyinLoopPushJobTask = () => {
             break;
         }
       }
+    }).catch(err => {
+      console.log(err);
+      // 弹窗报错
+
+      dialog.showMessageBoxSync({
+        type: 'info',
+        title: '员工授权绑定提示',
+        message: '员工授权信息失效,关闭监听后重新授权!',
+        buttons: ['确定']
+      });
     })
   }
 

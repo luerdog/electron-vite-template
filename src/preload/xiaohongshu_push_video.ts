@@ -107,7 +107,7 @@ let setCover = async (jobData) => {
   overDom.click()
   await waitForElementToDisappear('#workspace')
 }
-
+// 设置标题
 let setTitle = async (jobData) => {
   let inputDoms = Array.from(document.querySelectorAll('input'))
 
@@ -142,6 +142,49 @@ let setTitle = async (jobData) => {
   // 触发事件
   const event = new Event('input', {bubbles: true});
   input.dispatchEvent(event);
+}
+// 设置描述
+let setDescribe = async (jobData) => {
+  const editor = document.querySelector('#quillEditor');
+  const editable = editor.querySelector('[contenteditable="true"]') as HTMLElement;
+
+  let text = jobData.describe;
+
+  if (editable) {
+    // 方法1B: 更真实的模拟输入（推荐）
+    const textNode = document.createTextNode(text);
+    const range = document.createRange();
+    const selection = window.getSelection();
+
+    // 设置插入位置（当前光标位置或末尾）
+    range.selectNodeContents(editable);
+    range.collapse(false); // false 表示插入到末尾
+
+    // 插入内容
+    range.insertNode(textNode);
+
+    // 移动光标到插入内容之后
+    range.setStartAfter(textNode);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);    // 触发输入事件
+
+
+    const events = ['input', 'change', 'keydown', 'keyup', 'keypress'];
+    events.forEach(eventType => {
+      const event = new Event(eventType, {
+        bubbles: true,
+        cancelable: true,
+        composed: true
+      });
+      editable.dispatchEvent(event);
+      editor.dispatchEvent(event);
+    });
+    editable.firstElementChild.remove();
+
+    // 保持焦点
+    editable.focus();
+  }
 }
 
 let runTask = async () => {
@@ -179,6 +222,10 @@ let runTask = async () => {
   floatingBox.updateContent('正在设置标题');
   await delay(1000);
   await setTitle(jobData);
+
+  floatingBox.updateContent('正在设置描述');
+  await delay(1000);
+  await setDescribe(jobData);
 }
 
 

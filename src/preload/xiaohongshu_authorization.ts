@@ -7,9 +7,12 @@ function getJobData() {
   return JSON.parse(rawArgs[dataIndex])
 }
 
-let jobData = getJobData();
 
 window.onload = async (event) => {
+  let jobData = getJobData();
+
+  console.log(jobData);
+
   if (!jobData.client_id) {
     await funcTool.delay(2000);
     await funcTool.waitForText('发布笔记');
@@ -35,6 +38,7 @@ window.onload = async (event) => {
       alert('小红书数据已同步');
       close();
     }
+    return;
   }
 
   console.log('到此一游 逼事不干')

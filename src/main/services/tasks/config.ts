@@ -1,7 +1,8 @@
 import axios from "axios";
 import querystring from "node:querystring";
 
-let domain = 'http://127.0.0.1:81';
+// let domain = 'http://127.0.0.1:81';
+let domain = 'https://doujia-api.luerdog.com';
 
 export const taskConfig = {
   window: {
