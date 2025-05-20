@@ -96,8 +96,9 @@ async function changeArea(text) {
   await delay(500);
   await waitForElement('.semi-select-option-list');
 
+  await delay(1000);
   let listDom = document.querySelector('.semi-select-option-list')
-  await delay(1500);
+  await delay(2000);
   let listDomFirstChild = listDom.firstElementChild as HTMLElement;
   listDomFirstChild.click()
 
@@ -352,6 +353,7 @@ async function runTask() {
         await waitForText('作品管理')
 
         // todo 等待第一个作品的标题是否是发布的标题
+        // todo 判断页面上是否出现了掉线的文本 如果出现了 就直接关闭 没出现 就修改状态
         await taskConfig.tools.changePushJobStatus(jobData.id)
 
         await delay(1000);

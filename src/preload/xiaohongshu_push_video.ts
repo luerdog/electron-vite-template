@@ -186,6 +186,29 @@ let setDescribe = async (jobData) => {
     editable.focus();
   }
 }
+// 设置定时发布
+let setForePush = async (jobData) => {
+  let dom = getParentOfElementWithText('定时发布')
+  dom.click();
+  await delay(1500);
+
+  let inputDom: HTMLInputElement = document.querySelector('input[placeholder="选择日期和时间"]');
+  console.log(inputDom);
+  inputDom.click()
+  inputDom.focus()
+  await delay(1500);
+
+  // 设置定时
+  inputDom.value = jobData.release_at;
+  inputDom.setAttribute("value", jobData.release_at);
+  console.log('定时器控件');
+  console.log(inputDom);
+  let events = ['input', 'change'];
+  for (let event of events) {
+    const e = new Event(event, {bubbles: true});
+    inputDom.dispatchEvent(e);
+  }
+}
 
 let runTask = async () => {
   // 初始化悬浮框
@@ -226,6 +249,10 @@ let runTask = async () => {
   floatingBox.updateContent('正在设置描述');
   await delay(1000);
   await setDescribe(jobData);
+
+  floatingBox.updateContent('正在设置定时发布');
+  await delay(1000);
+  await setForePush(jobData);
 }
 
 
