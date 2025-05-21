@@ -61,7 +61,7 @@ export const onWechatVideoAuthorization = async (data) => {
     // 把cookies同步到云端
     const params = {
       session_tag: data.session_tag,
-      platform_id: 3,
+      platform_id: 4,
       cookies: cookiesData
     };
     let apiurl = taskConfig.api.synceCookiesApi;
