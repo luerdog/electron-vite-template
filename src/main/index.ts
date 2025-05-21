@@ -32,6 +32,9 @@ function onAppReady() {
   }
 }
 
+// todo 测试是否能解决二维码显示问题
+app.commandLine.appendSwitch("disable-site-isolation-trials");
+
 app.whenReady().then(onAppReady);
 // 由于9.x版本问题，需要加入该配置关闭跨域问题
 app.commandLine.appendSwitch("disable-features", "OutOfBlinkCors");

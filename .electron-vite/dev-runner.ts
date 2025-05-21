@@ -19,6 +19,7 @@ const mainOpt = rollupOptions(process.env.NODE_ENV, "main");
 const preloadOpt = rollupOptions(process.env.NODE_ENV, "preload");
 const preloadDouyinAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "douyin_authorization");
 const preloadXiaohongshuAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "xiaohongshu_authorization");
+const preloadWechatVideoAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "wechat_video_authorization");
 const preloadDouyinPushVideoOpt = rollupOptions(process.env.NODE_ENV, "douyin_push_video");
 const preloadXiaohongshuPushVideoOpt = rollupOptions(process.env.NODE_ENV, "xiaohongshu_push_video");
 
@@ -133,6 +134,7 @@ function startPreload(): Promise<void> {
       preloadOpt,
       preloadDouyinAuthorizationOpt,
       preloadXiaohongshuAuthorizationOpt,
+      preloadWechatVideoAuthorizationOpt,
       preloadDouyinPushVideoOpt,
       preloadXiaohongshuPushVideoOpt
     ];

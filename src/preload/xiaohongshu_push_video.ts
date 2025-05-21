@@ -1,4 +1,5 @@
 import funcTool from "./funcTool";
+import {color} from "listr2";
 
 // 创建悬浮框
 let createFloatingBox = funcTool.createFloatingBox;
@@ -80,7 +81,7 @@ let setCover = async (jobData) => {
     // (1) 获取图片 Blob
     const response = await fetch(cover_url);
     const blob = await response.blob();
-    await delay(2000);
+    await delay(1000);
     // (2) 创建 File 对象（模拟用户上传的文件）
     const file = new File([blob], 'fake-image.png', {type: blob.type});
 
@@ -95,12 +96,12 @@ let setCover = async (jobData) => {
     // (5) 触发 change 事件（某些组件依赖这个事件）
     const event = new Event('change', {bubbles: true});
     targetInput.dispatchEvent(event);
-    await delay(2000);
+    await delay(1000);
     console.log('图片已成功注入 input', targetInput.files);
   } catch (error) {
     console.error('伪造图片失败:', error);
   }
-  await delay(2000);
+  await delay(1000);
 
   let overDom = getParentOfElementWithText('确定')
 
@@ -208,6 +209,28 @@ let setForePush = async (jobData) => {
     const e = new Event(event, {bubbles: true});
     inputDom.dispatchEvent(e);
   }
+
+  await delay(2000);
+
+  let quedingdom = getParentOfElementWithText('确定');
+  quedingdom.click();
+}
+
+let submit = async (jobData) => {
+  let submitText: null | string;
+  if (jobData.is_fore_push == 'fore_push') submitText = '定时发布';
+  else submitText = '发布';
+
+  let bdoms = Array.from(document.getElementsByTagName('button'));
+  let dom = null;
+  for (let bdom of bdoms) {
+    if (bdom.textContent == submitText) {
+      dom = bdom;
+      break;
+    }
+  }
+  if (!dom) console.log('没找到发布按钮');
+  dom.click();
 }
 
 let runTask = async () => {
@@ -250,9 +273,20 @@ let runTask = async () => {
   await delay(1000);
   await setDescribe(jobData);
 
-  floatingBox.updateContent('正在设置定时发布');
+  // todo 有心情写一下地址定位
+
+  if (jobData.is_fore_push == 'fore_push') {
+    floatingBox.updateContent('正在设置定时发布');
+    await delay(1000);
+    await setForePush(jobData);
+  }
+
+  floatingBox.updateContent('正在提交发布笔记');
   await delay(1000);
-  await setForePush(jobData);
+  await submit(jobData);
+
+  // 任务完成自动关闭窗口
+  close();
 }
 
 

@@ -16,6 +16,7 @@ const preloadOpt = rollupOptions(process.env.NODE_ENV, "preload");
 // todo 插入需要编译的preload.js
 const preloadDouyinAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "douyin_authorization");
 const preloadXiaohongshuAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "xiaohongshu_authorization");
+const preloadWechatVideoAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "wechat_video_authorization");
 const preloadDouyinPushVideoOpt = rollupOptions(process.env.NODE_ENV, "douyin_push_video");
 const preloadXiaohongshuPushVideoOpt = rollupOptions(process.env.NODE_ENV, "xiaohongshu_push_video");
 
@@ -66,6 +67,7 @@ async function unionBuild() {
               preloadOpt,
               preloadDouyinAuthorizationOpt,
               preloadXiaohongshuAuthorizationOpt,
+              preloadWechatVideoAuthorizationOpt,
               preloadDouyinPushVideoOpt,
               preloadXiaohongshuPushVideoOpt,
             ];

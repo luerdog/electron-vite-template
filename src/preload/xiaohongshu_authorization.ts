@@ -17,12 +17,12 @@ window.onload = async (event) => {
     await funcTool.delay(2000);
     await funcTool.waitForText('发布笔记');
 
-    let userJosn = localStorage.getItem('USER_INFO_FOR_BIZ');
-    if (!userJosn) close();
+    let userJson = localStorage.getItem('USER_INFO_FOR_BIZ');
+    if (!userJson) close();
 
     let doms = document.getElementsByClassName('numerical');
 
-    let userData = JSON.parse(userJosn);
+    let userData = JSON.parse(userJson);
     let saveData = {
       user_id: jobData.user_id,
       session_tag: jobData.session_tag,
