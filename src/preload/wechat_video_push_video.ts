@@ -1,4 +1,5 @@
 import funcTool from "./funcTool";
+import {taskConfig} from "@main/services/tasks/config";
 
 // 创建悬浮框
 let createFloatingBox = funcTool.createFloatingBox;
@@ -105,8 +106,8 @@ let setTitle = async (jobData) => {
       input = i
     }
   }
-
   if (!input) return;
+  await scrollToCreatorModal(input);
 
   input.value = text
   // 获取原始描述符
@@ -135,7 +136,7 @@ let setTitle = async (jobData) => {
 }
 
 let setForePush = async (jobData) => {
-  jobData.release_at = jobData.release_at + ':00';
+  // jobData.release_at = jobData.release_at + ':00';
   let input = Array.from(getIframeBody().getElementsByClassName("weui-desktop-form__check-content"));
 
   let foreBtn = null;
@@ -160,6 +161,7 @@ let setForePush = async (jobData) => {
     }
   }
   if (!timeInputDom) return;
+  await scrollToCreatorModal(timeInputDom);
 
   await delay(1500)
 
@@ -190,14 +192,42 @@ let setForePush = async (jobData) => {
   }
 }
 
+let submit = async (jobData) => {
+  let btns = Array.from(getIframeBody().getElementsByTagName('button'));
+  let submitBtn = null;
+  for (let b of btns) {
+    if (b.textContent == "发表") {
+      submitBtn = b;
+      break;
+    }
+  }
+  if (!submitBtn) return;
+  await scrollToCreatorModal(submitBtn);
+
+  await taskConfig.tools.changePushJobStatus(jobData.id)
+
+  submitBtn.click();
+}
+
+let listenPage = () => {
+  // 如果跳转到了视频管理页面 直接关闭窗口
+  let listData = getIframeBody().getElementsByClassName('post-feed-item');
+  console.log(listData);
+  if (listData.length > 0) {
+    close();
+  }
+}
+
 let runTask = async () => {
   let jobData = getJobData();
-  await delay(3000);
+  await delay(4000);
   let loginDom = document.getElementsByClassName('platform-info')
   if (loginDom.length > 0) {
     alert('微信视频号扫码登录失效,重新前往扫码授权!')
     close();
   }
+
+  setInterval(listenPage, 1000);
 
   let createVideoPageUrl = "https://channels.weixin.qq.com/platform/post/create";
 
@@ -206,21 +236,24 @@ let runTask = async () => {
   await delay(1000);
 
   await pushVideo(jobData);
-  await delay(2000);
+  await delay(1000);
 
-  await setTitle(jobData);
-  await delay(2000);
 
   await setDescribe(jobData);
-  await delay(2000);
-
+  await delay(1000);
+  //
   // await setCover(jobData);
-  // await delay(2000);
+  // await delay(20000);
+
+  await setTitle(jobData);
+  await delay(1000);
 
   if (jobData.is_fore_push == "fore_push") {
     await setForePush(jobData);
-    await delay(2000);
+    await delay(1000);
   }
+
+  await submit(jobData);
 }
 
 window.onload = async () => {
