@@ -95,6 +95,45 @@ let setDescribe = async (jobData) => {
   }
 }
 
+let setTitle = async (jobData) => {
+  let text = jobData.title;
+
+  let inputs = Array.from(getIframeBody().getElementsByClassName('weui-desktop-form__input'));
+  let input = null;
+  for (let i of inputs) {
+    if (i.getAttribute('placeholder') == '概括视频主要内容，字数建议6-16个字符') {
+      input = i
+    }
+  }
+
+  if (!input) return;
+
+  input.value = text
+  // 获取原始描述符
+  let descriptor = Object.getOwnPropertyDescriptor(
+    HTMLInputElement.prototype,
+    'value'
+  );
+
+  // 重定义 value 属性
+  Object.defineProperty(input, 'value', {
+    ...descriptor,
+    get: function () {
+      return text;
+    },
+    set: function () {
+    } // 阻止外部修改
+  });
+
+  // 更新 UI 显示
+  input.setAttribute('value', text);
+  input.value = text
+
+  // 触发事件
+  const event = new Event('input', {bubbles: true});
+  input.dispatchEvent(event);
+}
+
 let runTask = async () => {
   let jobData = getJobData();
   await delay(3000);
@@ -111,6 +150,9 @@ let runTask = async () => {
   await delay(1000);
 
   await pushVideo(jobData);
+  await delay(2000);
+
+  await setTitle(jobData);
   await delay(2000);
 
   await setDescribe(jobData);
