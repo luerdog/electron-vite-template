@@ -118,7 +118,7 @@ let funcTool = {
     return new Promise(resolve => setTimeout(resolve, ms));
   },
   // 等待指定文字
-  waitForText: async (text, timeout = 30000, interval = 100) => {
+  waitForText: (text, timeout = 30000, interval = 100) => {
     return new Promise((resolve, reject) => {
       const startTime = Date.now();
 

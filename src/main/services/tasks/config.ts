@@ -114,9 +114,7 @@ export const taskConfig = {
           const cookies = JSON.parse(cookiesData);
           for (const cookie of cookies) {
             try {
-              if (!cookie.url) {
-                cookie.url = taskConfig.url.creatorWechatVideoCom
-              }
+              cookie.url = taskConfig.url.creatorWechatVideoCom
 
               await sessionData.cookies.set(cookie);
             } catch (error) {

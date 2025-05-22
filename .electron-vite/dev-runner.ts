@@ -22,6 +22,7 @@ const preloadXiaohongshuAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "
 const preloadWechatVideoAuthorizationOpt = rollupOptions(process.env.NODE_ENV, "wechat_video_authorization");
 const preloadDouyinPushVideoOpt = rollupOptions(process.env.NODE_ENV, "douyin_push_video");
 const preloadXiaohongshuPushVideoOpt = rollupOptions(process.env.NODE_ENV, "xiaohongshu_push_video");
+const preloadWechatVideoPushVideoOpt = rollupOptions(process.env.NODE_ENV, "wechat_video_push_video");
 
 let electronProcess: ChildProcess | null = null;
 let manualRestart = false;
@@ -136,7 +137,8 @@ function startPreload(): Promise<void> {
       preloadXiaohongshuAuthorizationOpt,
       preloadWechatVideoAuthorizationOpt,
       preloadDouyinPushVideoOpt,
-      preloadXiaohongshuPushVideoOpt
+      preloadXiaohongshuPushVideoOpt,
+      preloadWechatVideoPushVideoOpt,
     ];
     preloads.map(async preload => {
       const PreloadWatcher = watch(preload);

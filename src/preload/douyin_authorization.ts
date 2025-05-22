@@ -39,11 +39,12 @@ let syncUserId = async () => {
   let data = JSON.parse(user_data_json);
   let douyin_user_id = data.user_unique_id;
 
-  let params = getJobData();
-  params['douyin_user_id'] = douyin_user_id;
-  console.log(params);
-  params['fans_counts'] = document.getElementById('guide_home_fans').getElementsByTagName('span')[0].textContent;
-  params['like_counts'] = document.getElementById('guide_home_following').getElementsByTagName('span')[0].textContent;
+  let params = {
+    ...getJobData(),
+    douyin_user_id: douyin_user_id,
+    fans_counts: document.getElementById('guide_home_fans').getElementsByTagName('span')[0].textContent,
+    like_counts: document.getElementById('guide_home_following').getElementsByTagName('span')[0].textContent
+  };
 
   let apiurl = taskConfig.api.saveDouyinUserIdApi;
 

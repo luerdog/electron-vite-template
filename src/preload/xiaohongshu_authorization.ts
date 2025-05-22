@@ -11,8 +11,6 @@ function getJobData() {
 window.onload = async (event) => {
   let jobData = getJobData();
 
-  console.log(jobData);
-
   if (!jobData.client_id) {
     await funcTool.delay(2000);
     await funcTool.waitForText('发布笔记');
@@ -24,8 +22,9 @@ window.onload = async (event) => {
 
     let userData = JSON.parse(userJson);
     let saveData = {
-      user_id: jobData.user_id,
-      session_tag: jobData.session_tag,
+      ...jobData,
+      // user_id: jobData.user_id,
+      // session_tag: jobData.session_tag,
       name: userData.userName,
       avatar: userData.userAvatar,
       xiaohongshu_user_id: userData.userId,

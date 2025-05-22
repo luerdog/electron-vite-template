@@ -2,6 +2,7 @@ import Store from 'electron-store'
 import {taskConfig} from "@main/services/tasks/config";
 import pushVideoToDouyin from "@main/services/tasks/handles/pushVideoToDouyin";
 import pushVideoToXiaohongshu from "@main/services/tasks/handles/pushVideoToXiaohongshu";
+import pushVideoToWechatVideo from "@main/services/tasks/handles/pushVideoToWechatVideo";
 import {dialog} from "electron";
 
 const store = new Store();
@@ -36,6 +37,7 @@ export const OnDouyinLoopPushJobTask = () => {
         // console.log((new Date).toString() + "来活啦,兄弟们 开进程!")
 
         let job = data.data[0];
+        console.log("push_job:", job);
         switch (job.type) {
           // 判断如果是抖音任务,就进入抖音任务流程
           case 1:
@@ -44,6 +46,9 @@ export const OnDouyinLoopPushJobTask = () => {
           // 如果是小红书 就进入小红书的任务流程
           case 4:
             pushVideoToXiaohongshu(job);
+            break;
+          case 5:
+            pushVideoToWechatVideo(job);
             break;
           default:
             break;

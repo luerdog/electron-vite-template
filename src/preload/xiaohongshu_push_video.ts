@@ -1,5 +1,4 @@
 import funcTool from "./funcTool";
-import {color} from "listr2";
 
 // 创建悬浮框
 let createFloatingBox = funcTool.createFloatingBox;
@@ -60,7 +59,6 @@ let pushVideo = async (jobData) => {
     inputDom.dispatchEvent(event);
   }
 }
-
 // 设置封面
 let setCover = async (jobData) => {
   let dom = getParentOfElementWithText('设置封面')
@@ -190,6 +188,8 @@ let setDescribe = async (jobData) => {
 // 设置定时发布
 let setForePush = async (jobData) => {
   let dom = getParentOfElementWithText('定时发布')
+  await scrollToCreatorModal(dom);
+  await delay(1000);
   dom.click();
   await delay(1500);
 

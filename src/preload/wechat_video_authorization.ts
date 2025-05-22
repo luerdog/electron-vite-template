@@ -23,8 +23,9 @@ window.onload = async () => {
     let fansCountsDom = userInfoDom.getElementsByClassName('finder-info-num')[1] as HTMLElement;
 
     let saveData = {
-      user_id: jobData.user_id,
-      session_tag: jobData.session_tag,
+      ...jobData,
+      // user_id: jobData.user_id,
+      // session_tag: jobData.session_tag,
       avatar: avatarDom.getAttribute('src'),
       name: nameDom.textContent,
       wechat_video_user_id: userIdDom.textContent,
