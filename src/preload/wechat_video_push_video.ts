@@ -134,6 +134,62 @@ let setTitle = async (jobData) => {
   input.dispatchEvent(event);
 }
 
+let setForePush = async (jobData) => {
+  jobData.release_at = jobData.release_at + ':00';
+  let input = Array.from(getIframeBody().getElementsByClassName("weui-desktop-form__check-content"));
+
+  let foreBtn = null;
+  for (let i of input) {
+    if (i.textContent == "定时") {
+      foreBtn = i;
+      break;
+    }
+  }
+  if (!foreBtn) return;
+
+  foreBtn.click()
+  await delay(1500)
+
+  let timeInput = Array.from(getIframeBody().getElementsByClassName("weui-desktop-form__input"));
+
+  let timeInputDom = null;
+  for (let i of timeInput) {
+    if (i.getAttribute('placeholder') == "请选择发表时间") {
+      timeInputDom = i;
+      break;
+    }
+  }
+  if (!timeInputDom) return;
+
+  await delay(1500)
+
+  timeInputDom.value = jobData.release_at;
+  timeInputDom.setAttribute("value", jobData.release_at);
+
+  let descriptor = Object.getOwnPropertyDescriptor(
+    HTMLInputElement.prototype,
+    'value'
+  );
+
+  Object.defineProperty(timeInputDom, 'value', {
+    ...descriptor,
+    get: function () {
+      return jobData.release_at;
+    },
+    set: function () {
+    } // 阻止外部修改
+  });
+
+  await delay(1500)
+
+  let events = ['change'];
+  for (let event of events) {
+    await delay(1500)
+    const e = new Event(event, {bubbles: true});
+    timeInputDom.dispatchEvent(e);
+  }
+}
+
 let runTask = async () => {
   let jobData = getJobData();
   await delay(3000);
@@ -160,6 +216,11 @@ let runTask = async () => {
 
   // await setCover(jobData);
   // await delay(2000);
+
+  if (jobData.is_fore_push == "fore_push") {
+    await setForePush(jobData);
+    await delay(2000);
+  }
 }
 
 window.onload = async () => {

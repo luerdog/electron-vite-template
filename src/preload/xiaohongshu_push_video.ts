@@ -1,4 +1,5 @@
 import funcTool from "./funcTool";
+import {taskConfig} from "@main/services/tasks/config";
 
 // 创建悬浮框
 let createFloatingBox = funcTool.createFloatingBox;
@@ -284,6 +285,9 @@ let runTask = async () => {
   floatingBox.updateContent('正在提交发布笔记');
   await delay(1000);
   await submit(jobData);
+
+  // 更新任务状态
+  await taskConfig.tools.changePushJobStatus(jobData.id)
 
   // 任务完成自动关闭窗口
   close();
